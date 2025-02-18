@@ -11,6 +11,9 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        afacad: ['Afacad', 'Arial', 'Helvetica', 'sans-serif'],
+      },
     },
   },
   plugins: [],
