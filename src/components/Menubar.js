@@ -15,18 +15,20 @@ export default function Menubar() {
     const router = useRouter();
 
   return (
-    <div className={`${afacadFont.variable} font-afacad min-h-screen p-4`}>
+    <div className={`${afacadFont.variable} font-afacad p-4`}>
         <div className="flex justify-between border border-red-500">
-            <Image src={Logo} alt="Logo" className="w-[10%] h-[10%]" />
-            <div className="flex justify-end w-[50%] border border-blue-700">
-                <div className="bg-[#2A3663] flex justify-around m-2 w-[70%] rounded-[10px] border border-blue-700">
-                    <button onClick={() => router.push("/Organize")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] border border-blue-700">
+            <button onClick={() => router.push("/Home")} className="w-[10%] h-[10%]">
+            <Image src={Logo} alt="Logo" />
+            </button>
+            <div className="flex justify-end w-[50%]">
+                <div className="bg-[#2A3663] flex justify-around m-2 w-[70%] rounded-[10px] ">
+                    <button onClick={() => router.push("/Organize")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-l-[1rem]">
                         <h1 className="text text-white">Organize</h1>
                     </button>
-                    <button onClick={() => router.push("/Todolist")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] border border-blue-700">
+                    <button onClick={() => router.push("/Todolist")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38]">
                         <h1 className="text text-white">To-do List</h1>
                     </button>
-                    <button onClick={() => router.push("/Ideas")} className="flex items-center justify-center font-bold text-[24pt] w-[60%]  transition-all duration-500 ease-in-out hover:bg-[#131b38] border border-blue-700">
+                    <button onClick={() => router.push("/Ideas")} className="flex items-center justify-center font-bold text-[24pt] w-[60%]  transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-r-[1rem]">
                         <h1 className="text text-white">Ideas</h1>
                     </button>
 
