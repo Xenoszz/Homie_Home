@@ -16,15 +16,22 @@ export default function Home() {
   const scrollRef = useRef(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [spaceData, setSpaceData] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/sginfo")
+      .then((res) => res.json())
+      .then((data) => setSpaceData(data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const handleScroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.clientWidth;
-      if (direction === "left") {
-        scrollRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-      } else {
-        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-      }
+      const scrollAmount = scrollRef.current.children[0].clientWidth; // ✅ ความกว้างของกลุ่มข้อมูลแรก
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -32,14 +39,14 @@ export default function Home() {
     const checkScroll = () => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        setShowLeftArrow(scrollLeft > 0);
-        setShowRightArrow(scrollLeft + clientWidth < scrollWidth);
+        setShowLeftArrow(scrollLeft > 0); // ✅ แสดงลูกศรซ้ายเมื่อ scrollLeft > 0
+        setShowRightArrow(scrollLeft + clientWidth < scrollWidth); // ✅ แสดงลูกศรขวาเมื่อยัง scroll ได้อีก
       }
     };
 
     if (scrollRef.current) {
       scrollRef.current.addEventListener("scroll", checkScroll);
-      checkScroll();
+      checkScroll(); // ✅ เรียก checkScroll ทันทีเมื่อ component โหลด
     }
 
     return () => {
@@ -47,12 +54,13 @@ export default function Home() {
         scrollRef.current.removeEventListener("scroll", checkScroll);
       }
     };
-  }, []);
+  }, [spaceData]); // ✅ เรียก useEffect ใหม่เมื่อ spaceData เปลี่ยนแปลง
 
-  const cardGroups = [
-    [image1, image2, image3],
-    [image4, image5, image6]
-  ];
+  const groupedSpaceData = spaceData.reduce((acc, item, index) => {
+    if (index % 3 === 0) acc.push([]); // ✅ ทุกๆ 3 อัน ให้สร้างกลุ่มใหม่
+    acc[acc.length - 1].push(item);
+    return acc;
+  }, []);
 
   return (
     <div className="h-[100vh] w-[100vw] border border-yellow-700">
@@ -72,7 +80,7 @@ export default function Home() {
 
           {showLeftArrow && (
             <button
-              className="absolute left-6 top-[55%] transform -translate-y-1/2 bg-gray-300 bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center text-gray-800 text-2xl shadow-lg hover:bg-opacity-100 transition-all z-10"
+              className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-gray-300 bg-opacity-90 rounded-full w-12 h-12 flex items-center justify-center text-gray-800 text-3xl shadow-lg hover:bg-opacity-100 transition-all z-10"
               onClick={() => handleScroll("left")}
               aria-label="Previous cards"
             >
@@ -82,11 +90,16 @@ export default function Home() {
 
           <div className="h-[33vh] border border-red-600 overflow-hidden relative">
             <div ref={scrollRef} className="flex w-full h-full overflow-x-hidden scroll-smooth">
-              {cardGroups.map((group, groupIndex) => (
+              {groupedSpaceData.map((group, groupIndex) => (
                 <div key={groupIndex} className="flex justify-around min-w-full gap-x-3 flex-shrink-0">
-                  {group.map((img, imgIndex) => (
-                    <div key={`${groupIndex}-${imgIndex}`} className="w-[30%]">
-                      <Spaceguide imageSrc={img} />
+                  {group.map((item, index) => (
+                    <div key={index} className="w-[30%]">
+                      <Spaceguide
+                        imageSrc={item.imageSrc}
+                        title={item.title}
+                        description={item.description}
+                        extraInfo={{ arrangement: item.arrangement, tips: item.tips }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -96,7 +109,7 @@ export default function Home() {
 
           {showRightArrow && (
             <button
-              className="absolute right-6 top-[55%] transform -translate-y-1/2 bg-gray-300 bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center text-gray-800 text-2xl shadow-lg hover:bg-opacity-100 transition-all z-10"
+              className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-gray-300 bg-opacity-90 rounded-full w-12 h-12 flex items-center justify-center text-gray-800 text-3xl shadow-lg hover:bg-opacity-100 transition-all z-10"
               onClick={() => handleScroll("right")}
               aria-label="Next cards"
             >
