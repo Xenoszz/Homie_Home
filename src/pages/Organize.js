@@ -111,7 +111,7 @@ export default function Organize({ items }) {
           </button>
 
           {/* ✅ Container ที่มีการ์ด (แสดงทีละ 5) */}
-          <div className="flex gap-4 w-full justify-center">
+          <div className="flex gap-6 w-full justify-start px-4">
             {visibleItems.map((item) => (
               <CardComponent
                 key={item.id}
