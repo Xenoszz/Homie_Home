@@ -2,11 +2,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+<<<<<<< HEAD
+=======
+import { useRouter } from "next/navigation";
+>>>>>>> NET
 import Menubar from "@/components/Menubar";
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+<<<<<<< HEAD
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,6 +19,90 @@ export default function Login() {
     console.log('Login with:', { username, password });
   };
 
+=======
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [otp, setOtp] = useState("");
+  const [message, setMessage] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const router = useRouter();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        // setIsModalOpen(true); 
+        router.push("/Home"); 
+        // await handleSendOtp(); 
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.log(error);
+      setError("An error occurred during login.");
+    }
+  };
+
+  // const handleSendOtp = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:8000/send-otp", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ email }),
+  //     });
+  //     const data = await response.json();
+  //     setMessage(data.message || "OTP sent successfully.");
+  //     setIsOtpSent(true);
+  //   } catch (error) {
+  //   console.log(error);
+  //     setMessage("Error sending OTP.");
+  //   }
+  // };
+
+  // const handleVerifyOtp = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:8000/verify-otp", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ email, otp, password }),
+  //     });
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       setMessage(data.message || "OTP verified successfully.");
+  //       const token = data.token;
+  //       console.log("Received token:", token);
+  //       localStorage.setItem("token", token);
+  //       setTimeout(() => {
+  //           setIsModalOpen(false); 
+  //         }, 2000);
+  //         setTimeout(() => {
+  //           router.push("/home"); 
+  //         }, 2000);
+        
+  //     } else {
+  //       setMessage(data.message || "Error verifying OTP."); 
+  //     }
+  //   } catch (error) {
+  //     setMessage("Error verifying OTP.");
+  //   }
+  // };
+
+>>>>>>> NET
   return (
     <div className="h-[100vh] w-[100vw] border border-yellow-700">
     <Menubar />
