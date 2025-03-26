@@ -2,14 +2,8 @@ import { useRef, useState, useEffect } from "react";
 import Menubar from "@/components/Menubar";
 import Image from "next/image";
 import Spaceguide from "@/components/Spaceguide";
-import OrganizePage from "/public/home.jpg";
-import image1 from "/public/Card.jpg";
-import image2 from "/public/Card1.jpg";
-import image3 from "/public/Card2.jpg";
-import image4 from "/public/Card.jpg";
-import image5 from "/public/Card1.jpg";
-import image6 from "/public/Card2.jpg";
 import { useRouter } from "next/router";
+import OrganizePage from "/public/home.jpg";
 
 export default function Home() {
   const router = useRouter();
@@ -17,6 +11,8 @@ export default function Home() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [spaceData, setSpaceData] = useState([]);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false); // เพิ่ม state นี้
 
   useEffect(() => {
     fetch("/api/sginfo")
@@ -27,7 +23,7 @@ export default function Home() {
 
   const handleScroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.children[0].clientWidth; // ✅ ความกว้างของกลุ่มข้อมูลแรก
+      const scrollAmount = scrollRef.current.children[0].clientWidth;
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -39,14 +35,14 @@ export default function Home() {
     const checkScroll = () => {
       if (scrollRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        setShowLeftArrow(scrollLeft > 0); // ✅ แสดงลูกศรซ้ายเมื่อ scrollLeft > 0
-        setShowRightArrow(scrollLeft + clientWidth < scrollWidth); // ✅ แสดงลูกศรขวาเมื่อยัง scroll ได้อีก
+        setShowLeftArrow(scrollLeft > 0);
+        setShowRightArrow(scrollLeft + clientWidth < scrollWidth);
       }
     };
 
     if (scrollRef.current) {
       scrollRef.current.addEventListener("scroll", checkScroll);
-      checkScroll(); // ✅ เรียก checkScroll ทันทีเมื่อ component โหลด
+      checkScroll();
     }
 
     return () => {
@@ -54,10 +50,70 @@ export default function Home() {
         scrollRef.current.removeEventListener("scroll", checkScroll);
       }
     };
-  }, [spaceData]); // ✅ เรียก useEffect ใหม่เมื่อ spaceData เปลี่ยนแปลง
+  }, [spaceData]);
+
+  const handleProtectedRoute = (route) => {
+    const isLoggedIn = localStorage.getItem("username") !== null;
+    if (isLoggedIn) {
+      router.push(route);
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
+  // เพิ่มฟังก์ชัน handleSignup
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get('username');
+    const password = formData.get('password');
+    const email = formData.get('email');
+    const firstname = formData.get('firstname') || '';
+    const lastname = formData.get('lastname') || '';
+
+    try {
+      const response = await axios.post('http://localhost:8000/api/auth/register', {
+        username,
+        firstname,
+        lastname,
+        email,
+        password
+      }, { withCredentials: true });
+
+      if (response.status === 201) {
+        localStorage.setItem("username", username);
+        setShowSignupModal(false);
+        alert('Registration successful');
+      }
+    } catch (error) {
+      setSignupError(error.response?.data?.message || 'Registration failed');
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    try {
+      const response = await axios.post('http://localhost:8000/api/auth/login', {
+        email,
+        password
+      }, { withCredentials: true });
+
+      if (response.status === 200) {
+        localStorage.setItem("username", email);
+        setShowLoginModal(false);
+        router.push('/dashboard'); // เปลี่ยนเส้นทางหลังเข้าสู่ระบบ
+      }
+    } catch (error) {
+      setLoginError(error.response?.data?.message || 'Login failed');
+    }
+  };
 
   const groupedSpaceData = spaceData.reduce((acc, item, index) => {
-    if (index % 3 === 0) acc.push([]); // ✅ ทุกๆ 3 อัน ให้สร้างกลุ่มใหม่
+    if (index % 3 === 0) acc.push([]);
     acc[acc.length - 1].push(item);
     return acc;
   }, []);
@@ -124,11 +180,133 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-gradient-to-l from-[#B59F78] to-[#ffffff00] bg-opacity-70 rounded-[1rem] flex flex-col items-end">
           <h1 className="m-3 font-bold text-[32pt]">Smart Organizing Hack</h1>
-          <button className="m-3 font-bold text-[24pt] transition-transform duration-300 hover:scale-110" onClick={() => router.push("/Organize")}>
-            Organize Now
-          </button>
+          <button 
+  className="m-3 font-bold text-[24pt] transition-transform duration-300 hover:scale-110" 
+  onClick={() => handleProtectedRoute("/Organize")}
+>
+  Organize Now
+</button>
         </div>
       </div>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg w-96 relative">
+            <button 
+              onClick={() => setShowLoginModal(false)} 
+              className="absolute top-2 right-2 text-2xl"
+            >
+              ×
+            </button>
+            <h2 className="text-2xl mb-4">Login</h2>
+            {loginError && <p className="text-red-500 mb-4">{loginError}</p>}
+            <form onSubmit={handleLogin}>
+              <input 
+                type="email" 
+                name="email" 
+                placeholder="Email" 
+                className="w-full p-2 mb-4 border rounded" 
+                required 
+              />
+              <input 
+                type="password" 
+                name="password" 
+                placeholder="Password" 
+                className="w-full p-2 mb-4 border rounded" 
+                required 
+              />
+              <button 
+                type="submit" 
+                className="bg-[#2A3663] text-white px-4 py-2 rounded"
+              >
+                Login
+              </button>
+            </form>
+            <p className="mt-4 text-center">
+              Don't have an account?{" "}
+              <button 
+                onClick={() => { 
+                  setShowLoginModal(false); 
+                  setShowSignupModal(true);
+                }} 
+                className="text-[#2A3663] font-bold"
+              >
+                Sign Up
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Signup Modal */}
+      {showSignupModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg w-96 relative">
+            <button 
+              onClick={() => setShowSignupModal(false)} 
+              className="absolute top-2 right-2 text-2xl"
+            >
+              ×
+            </button>
+            <h2 className="text-2xl mb-4">Sign Up</h2>
+            {signupError && <p className="text-red-500 mb-4">{signupError}</p>}
+            <form onSubmit={handleSignup}>
+              <input 
+                type="text" 
+                name="username" 
+                placeholder="Username" 
+                className="w-full p-2 mb-4 border rounded" 
+                required 
+              />
+              <input 
+                type="text" 
+                name="firstname" 
+                placeholder="First Name" 
+                className="w-full p-2 mb-4 border rounded" 
+              />
+              <input 
+                type="text" 
+                name="lastname" 
+                placeholder="Last Name" 
+                className="w-full p-2 mb-4 border rounded" 
+              />
+              <input 
+                type="email" 
+                name="email" 
+                placeholder="Email" 
+                className="w-full p-2 mb-4 border rounded" 
+                required 
+              />
+              <input 
+                type="password" 
+                name="password" 
+                placeholder="Password" 
+                className="w-full p-2 mb-4 border rounded" 
+                required 
+              />
+              <button 
+                type="submit" 
+                className="bg-[#2A3663] text-white px-4 py-2 rounded"
+              >
+                Sign Up
+              </button>
+            </form>
+            <p className="mt-4 text-center">
+              Already have an account?{" "}
+              <button 
+                onClick={() => { 
+                  setShowSignupModal(false); 
+                  setShowLoginModal(true); 
+                }} 
+                className="text-[#2A3663] font-bold"
+              >
+                Login
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
