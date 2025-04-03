@@ -1,26 +1,71 @@
-"use client";
+"use client"
 import { useState } from 'react';
+import { useRouter } from "next/navigation"; 
+import Menubar from "@/components/Menubar";
 
 export default function Register({ onClose, onSwitchToLogin }) {
-  const [username, setUsername] = useState('');
-  const [firstname, setfirstname] = useState("");
-  const [lastname, setlastname] = useState("");
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
-  const [confirmpassword, setconfirmpassword] = useState("");
-  const [error, seterror] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const [username, setUsername] = useState('');
+  const [firstname, setFirstName] = useState("");
+  const [lastname, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Basic password confirmation validation
-    if (password !== confirmpassword) {
-      seterror("Passwords do not match");
+
+    if (!username || !firstname || !lastname || !email || !password || !confirmPassword) {
+      setError("Please complete all inputs!");
       return;
     }
 
-    // Add registration functionality here
-    console.log('Register with:', { username, firstname, lastname, email, password });
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const resCheckUser = await fetch("http://localhost:8000/api/auth/checkuser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.toLowerCase() }),
+      });
+
+      if (!resCheckUser.ok) {
+        setError("Failed to check user.");
+        return;
+      }
+
+      const { user } = await resCheckUser.json();
+      if (user) {
+        setError("User already exists on 8000!");
+        return;
+      }
+
+      const resRegister8000 = await fetch("http://localhost:8000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, firstname, lastname, email: email.toLowerCase(), password }),
+      });
+
+      if (!resRegister8000.ok) {
+        setError("Registration failed on 8000, please try again.");
+        return;
+      }
+
+      setError(""); 
+      setSuccess("User registration successful!");
+      router.push("/Home");
+      onClose();
+
+    } catch (error) {
+      console.error("Error during registration: ", error);
+      setError("An error occurred during registration.");
+    }
   };
 
   return (
@@ -48,7 +93,7 @@ export default function Register({ onClose, onSwitchToLogin }) {
               placeholder="Firstname"
               className="w-full border border-gray-300 rounded-md p-3 mb-4"
               value={firstname}
-              onChange={(e) => setfirstname(e.target.value)}
+              onChange={(e) => setFirstName(e.target.value)}
               required
             />
 
@@ -57,7 +102,7 @@ export default function Register({ onClose, onSwitchToLogin }) {
               placeholder="LastName"
               className="w-full border border-gray-300 rounded-md p-3 mb-4"
               value={lastname}
-              onChange={(e) => setlastname(e.target.value)}
+              onChange={(e) => setLastName(e.target.value)}
               required
             />
 
@@ -66,7 +111,7 @@ export default function Register({ onClose, onSwitchToLogin }) {
               placeholder="Email"
               className="w-full border border-gray-300 rounded-md p-3 mb-4"
               value={email}
-              onChange={(e) => setemail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
 
@@ -75,15 +120,15 @@ export default function Register({ onClose, onSwitchToLogin }) {
               placeholder="Password"
               className="w-full border border-gray-300 rounded-md p-3 mb-4"
               value={password}
-              onChange={(e) => setpassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
             <input
               type="password"
               placeholder="Confirm Password"
               className="w-full border border-gray-300 rounded-md p-3 mb-6"
-              value={confirmpassword}
-              onChange={(e) => setconfirmpassword(e.target.value)}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
             
