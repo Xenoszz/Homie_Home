@@ -67,11 +67,11 @@ export default function Organize({ items }) {
   return (
     <div className="h-[100vh] w-[100vw] border border-yellow-700">
       <Menubar />
-      <h1 className="text-[36pt] font-bold mb-4">Organize</h1>
+      <h1 className="text-[36pt] font-bold m-4">Organize</h1>
 
       {/* ✅ Search Bar และปุ่มค้นหา */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center border-4 rounded-xl border-[#4F4534] bg-[#FAF6E3] p-2 w-[30%]">
+        <div className="flex items-center border-4 rounded-xl border-[#4F4534] bg-[#FAF6E3] p-2 ml-4 w-[30%]">
           <input
             type="text"
             placeholder='Search e.g. "Earring, Pants"'
