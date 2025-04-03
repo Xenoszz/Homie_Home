@@ -1,6 +1,4 @@
-"use client";
-import Link from 'next/link';
-import Image from 'next/image';
+"use client"
 import { useState } from 'react';
 import Menubar from "@/components/Menubar";
 
