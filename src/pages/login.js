@@ -1,4 +1,5 @@
 "use client";
+import Link from 'next/link';
 import { useState } from 'react';
 
 export default function Login({ onClose, onSwitchToRegister }) {
@@ -44,7 +45,7 @@ export default function Login({ onClose, onSwitchToRegister }) {
             </button>
 
             <div className="mt-4 text-center">
-              <span className="text-gray-600">Don't have an account? </span>
+              <span className="text-gray-600">Don't have an account? </span>      
               <button 
                 type="button"
                 onClick={onSwitchToRegister}
