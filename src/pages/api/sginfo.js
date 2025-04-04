@@ -44,6 +44,5 @@ export default function handler(req, res) {
       }
     ];
 
-    console.log(spaceGuideData); // ✅ ตรวจสอบว่าข้อมูลครบไหม
     res.status(200).json(spaceGuideData);
 }
