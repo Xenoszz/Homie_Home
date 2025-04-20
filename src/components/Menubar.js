@@ -2,9 +2,10 @@ import { Afacad } from "next/font/google";
 import Image from "next/image";
 import Logo from "/public/Group 40.png";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import { decodeToken } from "@/utils/auth";
 
 const afacadFont = Afacad({
   subsets: ["latin"],
@@ -42,6 +43,8 @@ const AuthModal = ({ isOpen, onClose, type, onSwitchToRegister, onSwitchToLogin 
   );
 };
 
+
+
 export default function Menubar() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -55,21 +58,53 @@ export default function Menubar() {
   const switchToRegister = () => setAuthModalType('register');
   const switchToLogin = () => setAuthModalType('login');
 
+  const handleProtectedNavigation = (path) => {
+    if (!isLoggedIn) {
+      openLoginModal();
+    } else {
+      router.push(path);
+    }
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token'); 
+    setIsLoggedIn(false);
+    router.push("/Home");
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    const checkToken = () => {
+      const decoded = decodeToken();  
+      if (decoded) {
+        console.log('Token decoded:', decoded);
+        setIsLoggedIn(true);
+
+      } else {
+        console.log('No valid token');
+        setIsLoggedIn(false);
+
+      }
+    };
+    
+    checkToken();
+  }, []);  
+
   return (
     <div className={`${afacadFont.variable} font-afacad p-4`}>
       <div className="flex justify-between">
-        <button onClick={() => router.push("/Home")} className="w-[10%] h-[10%]">
+        <button onClick={() => handleProtectedNavigation("/Home")} className="w-[10%] h-[10%]">
           <Image src={Logo} alt="Logo" />
         </button>
         <div className="flex justify-end w-[50%]">
           <div className="bg-[#2A3663] flex justify-around m-2 w-[70%] rounded-[10px]">
-            <button onClick={() => router.push("/Organize")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-l-[1rem]">
+            <button onClick={() => handleProtectedNavigation("/Organize")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-l-[1rem]">
               <h1 className="text text-white">Organize</h1>
             </button>
-            <button onClick={() => router.push("/Todolist")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38]">
+            <button onClick={() => handleProtectedNavigation("/Todolist")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38]">
               <h1 className="text text-white">To-do List</h1>
             </button>
-            <button onClick={() => router.push("/Ideas")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-r-[1rem]">
+            <button onClick={() => handleProtectedNavigation("/Ideas")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-r-[1rem]">
               <h1 className="text text-white">Ideas</h1>
             </button>
           </div>
@@ -81,7 +116,7 @@ export default function Menubar() {
                 </div>
                 <button 
                   className="bg-[#2A3663] text-white px-4 py-2 rounded-[8px] hover:bg-[#131b38] transition-colors duration-300"
-                  onClick={() => setIsLoggedIn(false)}
+                  onClick={handleSignOut}
                 >
                   Logout
                 </button>
