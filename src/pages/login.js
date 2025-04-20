@@ -31,7 +31,10 @@ export default function Login({ onClose, onSwitchToRegister }) {
       const data = await res.json();
       if (res.ok) {
         // setIsModalOpen(true); 
-        router.push("/Home"); 
+        const token = data.token; 
+        console.log('Received token:', token);
+        localStorage.setItem('token', token);
+        window.location.reload();
         onClose();
         
         // await handleSendOtp(); 
