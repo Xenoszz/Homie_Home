@@ -140,11 +140,8 @@ export default function Organize({ items }) {
 
 // ✅ ใช้ getStaticProps ดึงข้อมูลจาก API
 export async function getStaticProps() {
-  const res = await fetch("http://localhost:3000/api/organizeinfo");
+  const res = await fetch("http://localhost:8000/api/organizeinfo");
   const data = await res.json();
-
-  return {
-    props: { items: data },
-    revalidate: 10, // รีเฟรชข้อมูลทุก 10 วินาที
-  };
+  return { props: { items: data }, revalidate: 10 };
 }
+

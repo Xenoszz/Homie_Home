@@ -1,8 +1,11 @@
 "use client";
+import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from "next/navigation";
+import Menubar from "@/components/Menubar";
 
-export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
+export default function Login({ onClose, onSwitchToRegister }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState("");
@@ -13,7 +16,6 @@ export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -28,9 +30,14 @@ export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
 
       const data = await res.json();
       if (res.ok) {
-        // ✅ ส่งชื่อผู้ใช้กลับไปที่ `Menubar`
-        onLoginSuccess(username);
-        onClose(); // ปิด modal
+        // setIsModalOpen(true); 
+        const token = data.token; 
+        console.log('Received token:', token);
+        localStorage.setItem('token', token);
+        window.location.reload();
+        onClose();
+        
+        // await handleSendOtp(); 
       } else {
         setError(data.message || "Login failed");
       }
@@ -53,7 +60,7 @@ export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
   //     setMessage(data.message || "OTP sent successfully.");
   //     setIsOtpSent(true);
   //   } catch (error) {
-  //     console.log(error);
+  //   console.log(error);
   //     setMessage("Error sending OTP.");
   //   }
   // };
@@ -74,13 +81,14 @@ export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
   //       console.log("Received token:", token);
   //       localStorage.setItem("token", token);
   //       setTimeout(() => {
-  //         setIsModalOpen(false);
-  //       }, 2000);
-  //       setTimeout(() => {
-  //         router.push("/home");
-  //       }, 2000);
+  //           setIsModalOpen(false); 
+  //         }, 2000);
+  //         setTimeout(() => {
+  //           router.push("/home"); 
+  //         }, 2000);
+        
   //     } else {
-  //       setMessage(data.message || "Error verifying OTP.");
+  //       setMessage(data.message || "Error verifying OTP."); 
   //     }
   //   } catch (error) {
   //     setMessage("Error verifying OTP.");
@@ -91,8 +99,8 @@ export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
     <div className="h-full w-full">
       <div className="flex items-center justify-center">
         <div className="bg-[#FAF6E3] rounded-[1rem] p-5 w-full flex flex-col items-center justify-center">  
+          {/* Login heading */}
           <h1 className="text-3xl font-bold mb-8">Login</h1>
-          {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={handleSubmit} className="w-full max-w-[1000px] flex flex-col items-center">
             <input
               type="text"
@@ -135,3 +143,4 @@ export default function Login({ onClose, onSwitchToRegister, onLoginSuccess }) {
     </div>
   );
 }
+{/* ยังไมเสด */}
