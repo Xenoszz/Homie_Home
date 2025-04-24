@@ -15,7 +15,7 @@ export default function Home() {
   const [showSignupModal, setShowSignupModal] = useState(false); // เพิ่ม state นี้
 
   useEffect(() => {
-    fetch("/api/sginfo")
+    fetch("http://localhost:8000/api/sginfo")
       .then((res) => res.json())
       .then((data) => setSpaceData(data))
       .catch((error) => console.error("Error fetching data:", error));
