@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       // Proxy the login request to your backend server
-      const response = await axios.post('http://localhost:8000/api/auth/login', req.body, {
+      const response = await axios.post('http://localhost:3000/api/auth/login', req.body, {
         headers: {
           'Content-Type': 'application/json'
         }

@@ -65,13 +65,13 @@ export default function Organize({ items }) {
   const visibleItems = selectedItems.slice(startIndex, endIndex);
 
   return (
-    <div className="p-6">
+    <div className="h-[100vh] w-[100vw] border border-yellow-700">
       <Menubar />
-      <h1 className="text-[36pt] font-bold mb-4">Organize</h1>
+      <h1 className="text-[36pt] font-bold m-4">Organize</h1>
 
       {/* ✅ Search Bar และปุ่มค้นหา */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center border-4 rounded-xl border-[#4F4534] bg-[#FAF6E3] p-2 w-[30%]">
+        <div className="flex items-center border-4 rounded-xl border-[#4F4534] bg-[#FAF6E3] p-2 ml-4 w-[30%]">
           <input
             type="text"
             placeholder='Search e.g. "Earring, Pants"'
@@ -85,7 +85,7 @@ export default function Organize({ items }) {
 
       {/* ✅ แสดงรายการที่ค้นหา */}
       {searchResults.length > 0 && (
-        <div className="flex gap-2 flex-wrap mt-4">
+        <div className="flex gap-2 flex-wrap mt-7 mb-7">
           {searchResults.map((item) => (
             <button
               key={item.id}
@@ -111,7 +111,7 @@ export default function Organize({ items }) {
           </button>
 
           {/* ✅ Container ที่มีการ์ด (แสดงทีละ 5) */}
-          <div className="flex gap-6 w-full justify-start px-4">
+          <div className="flex gap-6 w-full justify-start px-2">
             {visibleItems.map((item) => (
               <CardComponent
                 key={item.id}
@@ -140,11 +140,8 @@ export default function Organize({ items }) {
 
 // ✅ ใช้ getStaticProps ดึงข้อมูลจาก API
 export async function getStaticProps() {
-  const res = await fetch("http://localhost:3000/api/organizeinfo");
+  const res = await fetch("http://localhost:8000/api/organizeinfo");
   const data = await res.json();
-
-  return {
-    props: { items: data },
-    revalidate: 10, // รีเฟรชข้อมูลทุก 10 วินาที
-  };
+  return { props: { items: data }, revalidate: 10 };
 }
+
