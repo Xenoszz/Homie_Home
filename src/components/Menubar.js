@@ -40,7 +40,7 @@ export default function Menubar({
           .then((data) => {
             if (data.message === 'Token is valid') {
               setIsLoggedIn(true);
-              setUsername(data.user?.username || ''); 
+              setUsername(data.user?.username || '');
             } else {
               setIsLoggedIn(false);
               setUsername('');
@@ -53,7 +53,7 @@ export default function Menubar({
           });
       }
     }, []);
-    
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -73,13 +73,13 @@ export default function Menubar({
 
       const data = await res.json();
       if (res.ok) {
-        // setIsModalOpen(true); 
-        const token = data.token; 
+        // setIsModalOpen(true);
+        const token = data.token;
         console.log('Received token:', token);
         localStorage.setItem('token', token);
         window.location.reload();
-        
-        // await handleSendOtp(); 
+
+        // await handleSendOtp();
       } else {
         setError(data.message || "Login failed");
       }
@@ -88,7 +88,7 @@ export default function Menubar({
       setError("An error occurred during login.");
     }
   };
-  
+
   const handleSignup = async (e) => {
     e.preventDefault();
 
@@ -131,7 +131,7 @@ export default function Menubar({
         return;
       }
 
-      setError(""); 
+      setError("");
       setSuccess("User registration successful!");
       router.push("/Home");
 
