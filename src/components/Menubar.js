@@ -7,12 +7,12 @@ import { useRouter } from "next/router";
 const afacadFont = Afacad({
   subsets: ["latin"],
   weight: ["400", "700"],
-  variable: "--font-afacad",
+  variable: "--font-afacad", // ใช้ตัวแปร CSS เพื่อให้ใช้งานกับ Tailwind ได้
 });
 
-export default function Menubar({ 
-  onLoginModalToggle, 
-  onSignupModalToggle 
+export default function Menubar({
+  onLoginModalToggle,
+  onSignupModalToggle
 }) {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,7 +39,7 @@ export default function Menubar({
       setIsLoggedIn(true);
       setUsername(enteredUsername);
       setShowLoginModal(false);
-      
+
       // Inform parent component about login
       if (onLoginModalToggle) {
         onLoginModalToggle(false);
@@ -59,7 +59,7 @@ export default function Menubar({
       setIsLoggedIn(true);
       setUsername(enteredUsername);
       setShowSignupModal(false);
-      
+
       // Inform parent component about signup
       if (onSignupModalToggle) {
         onSignupModalToggle(false);
@@ -78,7 +78,7 @@ export default function Menubar({
       router.push(route);
     } else {
       setShowLoginModal(true);
-      
+
       // Inform parent component about login modal
       if (onLoginModalToggle) {
         onLoginModalToggle(true);
@@ -151,11 +151,11 @@ export default function Menubar({
             </form>
             <p className="mt-4 text-center">
               Don't have an account?{" "}
-              <button 
-                onClick={() => { 
-                  toggleLoginModal(false); 
-                  toggleSignupModal(true); 
-                }} 
+              <button
+                onClick={() => {
+                  toggleLoginModal(false);
+                  toggleSignupModal(true);
+                }}
                 className="text-[#2A3663] font-bold"
               >
                 Sign Up
