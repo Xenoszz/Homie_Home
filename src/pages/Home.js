@@ -12,7 +12,9 @@ export default function Home() {
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [spaceData, setSpaceData] = useState([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false); // เพิ่ม state นี้
+  const [showSignupModal, setShowSignupModal] = useState(false); 
+  const [loginError, setLoginError] = useState('');
+
 
   useEffect(() => {
     fetch("http://localhost:8000/api/sginfo")
