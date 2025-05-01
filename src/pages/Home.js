@@ -4,6 +4,8 @@ import Image from "next/image";
 import Spaceguide from "@/components/Spaceguide";
 import { useRouter } from "next/router";
 import OrganizePage from "/public/home.jpg";
+import LoginModal from "@/components/Loginpopup";
+import SignupModal from "@/components/Signuppopup";
 
 export default function Home() {
   const router = useRouter();
@@ -12,9 +14,53 @@ export default function Home() {
   const [showRightArrow, setShowRightArrow] = useState(true);
   const [spaceData, setSpaceData] = useState([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false); 
-  const [loginError, setLoginError] = useState('');
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
 
+  // Check login status when page loads
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
+
+  const checkLoginStatus = () => {
+    const storedToken = localStorage.getItem('token');
+    const storedUsername = localStorage.getItem('username');
+    
+    if (storedToken && storedUsername) {
+      setIsLoggedIn(true);
+      setUsername(storedUsername);
+    } else {
+      setIsLoggedIn(false);
+      setUsername('');
+    }
+    
+    // Validate token with server
+    if (storedToken) {
+      fetch('http://localhost:8000/check-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: storedToken }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.message === 'Token is valid') {
+            setIsLoggedIn(true);
+            setUsername(data.user?.username || storedUsername);
+          } else {
+            setIsLoggedIn(false);
+            setUsername('');
+          }
+        })
+        .catch((error) => {
+          setIsLoggedIn(false);
+          setUsername('');
+          console.error('Error checking token:', error);
+        });
+    }
+  };
 
   useEffect(() => {
     fetch("http://localhost:8000/api/sginfo")
@@ -55,63 +101,72 @@ export default function Home() {
   }, [spaceData]);
 
   const handleProtectedRoute = (route) => {
-    const isLoggedIn = localStorage.getItem("username") !== null;
-    if (isLoggedIn) {
-      router.push(route);
+    const storedToken = localStorage.getItem('token');
+    
+    if (isLoggedIn && storedToken) {
+      // Validate token with server before routing
+      fetch('http://localhost:8000/check-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: storedToken }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.message === 'Token is valid') {
+            router.push(route);
+          } else {
+            // Show login modal if token is invalid
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            setIsLoggedIn(false);
+            setShowLoginModal(true);
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          setShowLoginModal(true);
+        });
     } else {
       setShowLoginModal(true);
     }
   };
 
-  // เพิ่มฟังก์ชัน handleSignup
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const username = formData.get('username');
-    const password = formData.get('password');
-    const email = formData.get('email');
-    const firstname = formData.get('firstname') || '';
-    const lastname = formData.get('lastname') || '';
-
-    try {
-      const response = await axios.post('http://localhost:8000/api/auth/register', {
-        username,
-        firstname,
-        lastname,
-        email,
-        password
-      }, { withCredentials: true });
-
-      if (response.status === 201) {
-        localStorage.setItem("username", username);
-        setShowSignupModal(false);
-        alert('Registration successful');
-      }
-    } catch (error) {
-      setSignupError(error.response?.data?.message || 'Registration failed');
+  const handleSuccessfulLogin = (username, token) => {
+    setIsLoggedIn(true);
+    setUsername(username);
+    setShowLoginModal(false);
+    
+    // Redirect to protected route if there was a previous attempt
+    if (router.query.redirect) {
+      router.push(router.query.redirect);
+    } else {
+      window.location.reload();
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email');
-    const password = formData.get('password');
-
-    try {
-      const response = await axios.post('http://localhost:8000/api/auth/login', {
-        email,
-        password
-      }, { withCredentials: true });
-
-      if (response.status === 200) {
-        localStorage.setItem("username", email);
-        setShowLoginModal(false);
-        router.push('/dashboard'); // เปลี่ยนเส้นทางหลังเข้าสู่ระบบ
-      }
-    } catch (error) {
-      setLoginError(error.response?.data?.message || 'Login failed');
+  const handleSuccessfulSignup = (username, token) => {
+    setIsLoggedIn(true);
+    setUsername(username);
+    setShowSignupModal(false);
+    
+    // Redirect to protected route if there was a previous attempt
+    if (router.query.redirect) {
+      router.push(router.query.redirect);
+    } else {
+      window.location.reload();
     }
+  };
+
+  const toggleLoginModal = (show) => {
+    setShowLoginModal(show);
+    setShowSignupModal(false);
+  };
+
+  const toggleSignupModal = (show) => {
+    setShowSignupModal(show);
+    setShowLoginModal(false);
   };
 
   const groupedSpaceData = spaceData.reduce((acc, item, index) => {
@@ -122,7 +177,10 @@ export default function Home() {
 
   return (
     <div className="h-[100vh] w-[100vw] border border-yellow-700">
-      <Menubar />
+      <Menubar 
+        onLoginModalToggle={toggleLoginModal}
+        onSignupModalToggle={toggleSignupModal}
+      />
 
       <div className="flex p-3 ml-4 mr-4 h-[45vh] gap-x-3 border border-orange-700">
         <div className="flex flex-col border border-pink-600 w-[50vw]">
@@ -183,132 +241,35 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-l from-[#B59F78] to-[#ffffff00] bg-opacity-70 rounded-[1rem] flex flex-col items-end">
           <h1 className="m-3 font-bold text-[32pt]">Smart Organizing Hack</h1>
           <button 
-  className="m-3 font-bold text-[24pt] transition-transform duration-300 hover:scale-110" 
-  onClick={() => handleProtectedRoute("/Organize")}
->
-  Organize Now
-</button>
+            className="m-3 font-bold text-[24pt] transition-transform duration-300 hover:scale-110" 
+            onClick={() => handleProtectedRoute("/Organize")}
+          >
+            Organize Now
+          </button>
         </div>
       </div>
 
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg w-96 relative">
-            <button 
-              onClick={() => setShowLoginModal(false)} 
-              className="absolute top-2 right-2 text-2xl"
-            >
-              ×
-            </button>
-            <h2 className="text-2xl mb-4">Login</h2>
-            {loginError && <p className="text-red-500 mb-4">{loginError}</p>}
-            <form onSubmit={handleLogin}>
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="Email" 
-                className="w-full p-2 mb-4 border rounded" 
-                required 
-              />
-              <input 
-                type="password" 
-                name="password" 
-                placeholder="Password" 
-                className="w-full p-2 mb-4 border rounded" 
-                required 
-              />
-              <button 
-                type="submit" 
-                className="bg-[#2A3663] text-white px-4 py-2 rounded"
-              >
-                Login
-              </button>
-            </form>
-            <p className="mt-4 text-center">
-              Don't have an account?{" "}
-              <button 
-                onClick={() => { 
-                  setShowLoginModal(false); 
-                  setShowSignupModal(true);
-                }} 
-                className="text-[#2A3663] font-bold"
-              >
-                Sign Up
-              </button>
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Login Modal Component */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => toggleLoginModal(false)}
+        onSwitchToSignup={() => {
+          toggleLoginModal(false);
+          toggleSignupModal(true);
+        }}
+        onSuccessfulLogin={handleSuccessfulLogin}
+      />
 
-      {/* Signup Modal */}
-      {showSignupModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg w-96 relative">
-            <button 
-              onClick={() => setShowSignupModal(false)} 
-              className="absolute top-2 right-2 text-2xl"
-            >
-              ×
-            </button>
-            <h2 className="text-2xl mb-4">Sign Up</h2>
-            {signupError && <p className="text-red-500 mb-4">{signupError}</p>}
-            <form onSubmit={handleSignup}>
-              <input 
-                type="text" 
-                name="username" 
-                placeholder="Username" 
-                className="w-full p-2 mb-4 border rounded" 
-                required 
-              />
-              <input 
-                type="text" 
-                name="firstname" 
-                placeholder="First Name" 
-                className="w-full p-2 mb-4 border rounded" 
-              />
-              <input 
-                type="text" 
-                name="lastname" 
-                placeholder="Last Name" 
-                className="w-full p-2 mb-4 border rounded" 
-              />
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="Email" 
-                className="w-full p-2 mb-4 border rounded" 
-                required 
-              />
-              <input 
-                type="password" 
-                name="password" 
-                placeholder="Password" 
-                className="w-full p-2 mb-4 border rounded" 
-                required 
-              />
-              <button 
-                type="submit" 
-                className="bg-[#2A3663] text-white px-4 py-2 rounded"
-              >
-                Sign Up
-              </button>
-            </form>
-            <p className="mt-4 text-center">
-              Already have an account?{" "}
-              <button 
-                onClick={() => { 
-                  setShowSignupModal(false); 
-                  setShowLoginModal(true); 
-                }} 
-                className="text-[#2A3663] font-bold"
-              >
-                Login
-              </button>
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Signup Modal Component */}
+      <SignupModal 
+        isOpen={showSignupModal}
+        onClose={() => toggleSignupModal(false)}
+        onSwitchToLogin={() => {
+          toggleSignupModal(false);
+          toggleLoginModal(true);
+        }}
+        onSuccessfulSignup={handleSuccessfulSignup}
+      />
     </div>
   );
 }
