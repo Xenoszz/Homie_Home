@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import OrganizePage from "/public/home.jpg";
 import LoginModal from "@/components/Loginpopup";
 import SignupModal from "@/components/Signuppopup";
+import axios from "axios";
 
 export default function Home() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function Home() {
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [rooms, setRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
 
   // Check login status when page loads
   useEffect(() => {
@@ -68,6 +71,29 @@ export default function Home() {
       .then((data) => setSpaceData(data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoadingRooms(false);
+        setRooms([]);
+        return;
+      }
+      try {
+        const response = await axios.get('http://localhost:8000/api/rooms', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setRooms(response.data);
+      } catch (error) {
+        setRooms([]);
+        // ไม่ต้อง throw error
+      } finally {
+        setLoadingRooms(false);
+      }
+    };
+    fetchRooms();
+  }, [isLoggedIn]);
 
   const handleScroll = (direction) => {
     if (scrollRef.current) {
@@ -175,24 +201,108 @@ export default function Home() {
     return acc;
   }, []);
 
+  // คำนวณ overallProgress
+  const overallProgress = rooms.length > 0
+    ? Math.round(rooms.reduce((sum, r) => sum + (r.progress || 0), 0) / rooms.length)
+    : 0;
+
+  function OverallProgressCircle({ percent }) {
+    const radius = 80;
+    const stroke = 15;
+    const normalizedRadius = radius - stroke / 2;
+    const circumference = 2 * Math.PI * normalizedRadius;
+    const strokeDashoffset = circumference - (percent / 100) * circumference;
+
+    return (
+      <svg width={radius * 2} height={radius * 2}>
+        {/* วงพื้นหลัง */}
+        <circle
+          stroke="#E5E1D6"
+          fill="none"
+          strokeWidth={stroke}
+          cx={radius}
+          cy={radius}
+          r={normalizedRadius}
+        />
+        {/* วง foreground */}
+        <circle
+          stroke="#8D7C5F"
+          fill="none"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          cx={radius}
+          cy={radius}
+          r={normalizedRadius}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          style={{ transition: 'stroke-dashoffset 0.7s' }}
+        />
+        {/* ตัวเลขตรงกลาง */}
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dy=".3em"
+          fontSize="2rem"
+          fontWeight="bold"
+          fill="#58482D"
+        >
+          {percent}%
+        </text>
+      </svg>
+    );
+  }
+
   return (
-    <div className="h-[100vh] w-[100vw] border border-yellow-700">
+    <div className="h-[100vh] w-[100vw]">
       <Menubar 
         onLoginModalToggle={toggleLoginModal}
         onSignupModalToggle={toggleSignupModal}
+        isLoggedIn={isLoggedIn}
+        username={username}
+        setIsLoggedIn={setIsLoggedIn}
       />
 
-      <div className="flex p-3 ml-4 mr-4 h-[45vh] gap-x-3 border border-orange-700">
-        <div className="flex flex-col border border-pink-600 w-[50vw]">
-          <h3 className="text-[36pt] font-bold">Dashboard</h3>
-          <div className="h-[100vh] bg-[#FAF6E3] rounded-[1rem] flex border border-blue-500">
-            <div className="border border-green-600 w-[50%]"></div>
-            <div className="border border-green-600 w-[50%]"></div>
+      <div className="flex p-3 ml-4 mr-4 h-[45vh] gap-x-3 items-start">
+        <div className="flex flex-col w-[50vw]">
+          <h3 className="text-[36pt] font-bold mt-0 mb-4">Dashboard</h3>
+          {/* FIX: Set a specific height for the container and adjust overflow */}
+          <div className="flex flex-row h-[33vh] bg-[#FAF6E3] rounded-[1rem]">
+            <div className=" w-[85%] p-4 flex flex-col">
+              <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+                {!isLoggedIn ? (
+                  <div className="text-gray-500 text-center mt-8">Login to see your tasks progress</div>
+                ) : loadingRooms ? (
+                  <div>Loading...</div>
+                ) : rooms.length === 0 ? (
+                  <div className="text-gray-500">No rooms found</div>
+                ) : (
+                  rooms.map(room => (
+                    <div key={room._id} className="mb-4 p-3 bg-white rounded-lg shadow ">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-[#58482D]">{room.name}</span>
+                        <span className="text-sm text-gray-600">{room.progress || 0}%</span>
+                      </div>
+                      <div className="bg-gray-200 h-2 w-full rounded-full overflow-hidden">
+                        <div 
+                          className="bg-green-500 h-full transition-all duration-500" 
+                          style={{ width: `${room.progress || 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+            <div className=" w-1/2 flex flex-col items-center justify-center h-full">
+              <OverallProgressCircle percent={overallProgress} />
+              <div className="mt-2 text-[26pt] font-bold text-[#58482D]">Overall</div>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col border border-pink-600 w-[50vw] justify-between relative">
-          <h3 className="text-[36pt] font-bold">Space Guide</h3>
+        <div className="flex flex-col w-[50vw] justify-between relative">
+          <h3 className="text-[36pt] font-bold mt-0 mb-4">Space Guide</h3>
 
           {showLeftArrow && (
             <button
@@ -204,7 +314,7 @@ export default function Home() {
             </button>
           )}
 
-          <div className="h-[33vh] border border-red-600 overflow-hidden relative">
+          <div className="h-[33vh] overflow-hidden relative">
             <div ref={scrollRef} className="flex w-full h-full overflow-x-hidden scroll-smooth">
               {groupedSpaceData.map((group, groupIndex) => (
                 <div key={groupIndex} className="flex justify-around min-w-full gap-x-3 flex-shrink-0">
@@ -235,7 +345,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="relative mt-5 ml-4 mr-4 rounded-[1rem] h-[30vh] border border-orange-700">
+      <div className="relative mt-5 ml-4 mr-4 rounded-[1rem] h-[30vh]">
         <Image src={OrganizePage} alt="Card" className="w-full h-full object-cover rounded-[1rem] object-[60%_70%]" />
 
         <div className="absolute inset-0 bg-gradient-to-l from-[#B59F78] to-[#ffffff00] bg-opacity-70 rounded-[1rem] flex flex-col items-end">
@@ -252,10 +362,14 @@ export default function Home() {
       {/* Login Modal Component */}
       <LoginModal 
         isOpen={showLoginModal}
-        onClose={() => toggleLoginModal(false)}
+        onClose={() => {
+          setShowLoginModal(false);
+          setShowSignupModal(false);
+        }}
         onSwitchToSignup={() => {
-          toggleLoginModal(false);
-          toggleSignupModal(true);
+          setShowLoginModal(false);
+          setShowSignupModal(false);
+          setTimeout(() => setShowSignupModal(true), 0);
         }}
         onSuccessfulLogin={handleSuccessfulLogin}
       />
@@ -263,10 +377,14 @@ export default function Home() {
       {/* Signup Modal Component */}
       <SignupModal 
         isOpen={showSignupModal}
-        onClose={() => toggleSignupModal(false)}
+        onClose={() => {
+          setShowSignupModal(false);
+          setShowLoginModal(false);
+        }}
         onSwitchToLogin={() => {
-          toggleSignupModal(false);
-          toggleLoginModal(true);
+          setShowSignupModal(false);
+          setShowLoginModal(false);
+          setTimeout(() => setShowLoginModal(true), 0);
         }}
         onSuccessfulSignup={handleSuccessfulSignup}
       />

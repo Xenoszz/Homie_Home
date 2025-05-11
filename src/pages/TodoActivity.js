@@ -1,8 +1,10 @@
 import Menubar from "@/components/Menubar";
 import { ArrowLeft, Edit, Trash2, Plus, Save, X, Loader } from 'lucide-react';
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
+import CanvasTaskWheel from "@/components/CanvasTaskWheel";
 
 export default function TodoActivity() {
     const router = useRouter();
@@ -13,7 +15,7 @@ export default function TodoActivity() {
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [editTaskId, setEditTaskId] = useState(null);
     const [editTaskName, setEditTaskName] = useState("");
-    const [highlightedTask, setHighlightedTask] = useState(null);
+    const [highlightedTaskId, setHighlightedTaskId] = useState(null);
     
     useEffect(() => {
         // Check if we're on the client-side and have the roomId
@@ -21,7 +23,7 @@ export default function TodoActivity() {
             fetchRoomData();
         }
     }, [router.query]);
-    
+
     const fetchRoomData = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -92,27 +94,6 @@ export default function TodoActivity() {
         }
     };
 
-    const randomTask = () => {
-        // กรองเอาเฉพาะ tasks ที่ยังไม่เสร็จ
-        const incompleteTasks = tasks.filter(task => !task.completed);
-        
-        if (incompleteTasks.length === 0) {
-            return; // ไม่มี task ที่ยังไม่เสร็จ
-        }
-        
-        // สุ่มหนึ่ง task จาก incompleteTasks
-        const randomIndex = Math.floor(Math.random() * incompleteTasks.length);
-        const randomSelectedTask = incompleteTasks[randomIndex];
-        
-        // เพิ่ม animation หรือ effect เพื่อแสดงผล task ที่สุ่มได้ (เช่น highlight)
-        setHighlightedTask(randomSelectedTask._id);
-        
-        // ลบ highlight หลังจาก 2 วินาที
-        setTimeout(() => {
-            setHighlightedTask(null);
-        }, 2000);
-    };
-    
     const handleToggleTask = async (taskId, isCompleted) => {
         try {
             const token = localStorage.getItem('token');
@@ -211,28 +192,28 @@ export default function TodoActivity() {
                     <div className="flex-1 bg-white rounded-lg shadow-md p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-[#58482D]">To do list</h2>
-                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                room?.progress >= 75 ? 'bg-green-100 text-green-800' :
+                                room?.progress >= 40 ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
                                 {room?.progress || 0}% Complete
                             </span>
                         </div>
                         
                         {/* Task List */}
-                        <div className="space-y-3 mb-6">
-                            {tasks.map(task => (
-                                <div 
-                                key={task._id} 
-                                className={`flex items-center p-3 ${
-                                    highlightedTask === task._id 
-                                        ? 'bg-yellow-200 animate-pulse' 
-                                        : 'bg-[#FAF6E3]'
-                                } rounded-md shadow-sm transition-colors duration-300`}
-                            >
+                        <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
+                            {tasks.map((task) => (
+                               <div
+                                key={task._id}
+                                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 hover:bg-gray-50 ${highlightedTaskId === task._id ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md' : ''}`}
+                              > 
                                     {/* Checkbox */}
                                     <div 
                                         className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-3 border ${
                                             task.completed 
                                                 ? 'bg-green-500 border-green-600 text-white' 
-                                                : 'border-gray-400 bg-white'
+                                                : 'border-gray-400 bg-white hover:bg-gray-100'
                                         }`}
                                         onClick={() => handleToggleTask(task._id, task.completed)}
                                     >
@@ -246,7 +227,7 @@ export default function TodoActivity() {
                                                 type="text"
                                                 value={editTaskName}
                                                 onChange={(e) => setEditTaskName(e.target.value)}
-                                                className="flex-1 p-1 border rounded mr-2"
+                                                className="flex-1 p-2 border rounded mr-2"
                                                 autoFocus
                                             />
                                             <button 
@@ -289,7 +270,7 @@ export default function TodoActivity() {
                             ))}
                             
                             {tasks.length === 0 && (
-                                <div className="text-center py-4 text-gray-500">
+                                <div className="text-center py-8 text-gray-500">
                                     No tasks added yet
                                 </div>
                             )}
@@ -330,23 +311,16 @@ export default function TodoActivity() {
                         )}
                     </div>
                     
-                    {/* Task Wheel - Right Side (Placeholder for now) */}
+                    {/* Task Wheel - Right Side */}
                     <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold text-[#58482D] mb-4">Task Wheel</h2>
-                        <div className="flex flex-col items-center justify-center h-64">
-                            <div className="w-48 h-48 rounded-full border-4 border-gray-200 relative flex items-center justify-center">
-                                {/* You'll implement the wheel functionality later */}
-                                <div className="text-xl font-semibold text-[#58482D]">
-                                    {tasks.find(task => task.completed === false)?.name || "All Done!"}
-                                </div>
-                            </div>
-                            <button 
-    onClick={randomTask}
-    className="mt-6 bg-[#B59F78] text-white px-6 py-2 rounded-md hover:bg-[#8d7c5f]"
->
-    random
-</button>
-                        </div>
+                        <h2 className="text-xl font-semibold text-[#58482D] mb-6">Task Wheel</h2>
+                        <CanvasTaskWheel
+                            tasks={tasks.filter(task => !task.completed)}
+                            onSelectIndex={idx => {
+                                const incomplete = tasks.filter(task => !task.completed);
+                                setHighlightedTaskId(incomplete[idx]?._id || null);
+                            }}
+                        />
                     </div>
                 </div>
             </div>

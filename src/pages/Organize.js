@@ -7,8 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Organize({ items }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(items);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -18,13 +17,16 @@ export default function Organize({ items }) {
   const handleSearch = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    setSearchResults(
-      term.trim() === ""
-        ? []
-        : items.filter((item) =>
-            item.name.toLowerCase().includes(term.toLowerCase())
-          )
-    );
+    if (term.trim() === "") {
+      setSelectedItems(items);
+      setCurrentPage(0);
+    } else {
+      const filtered = items.filter((item) =>
+        item.name.toLowerCase().includes(term.toLowerCase())
+      );
+      setSelectedItems(filtered);
+      setCurrentPage(0);
+    }
   };
 
   // ✅ เพิ่มไอเทม
@@ -83,10 +85,10 @@ export default function Organize({ items }) {
         </div>
       </div>
 
-      {/* ✅ แสดงรายการที่ค้นหา */}
-      {searchResults.length > 0 && (
-        <div className="flex gap-2 flex-wrap mt-7 mb-7">
-          {searchResults.map((item) => (
+      {/* ✅ แสดงรายการที่ค้นหา (หมวดหมู่) */}
+      {selectedItems.length > 0 && (
+        <div className="flex gap-3 flex-wrap mt-7 mb-7 ml-4">
+          {selectedItems.map((item) => (
             <button
               key={item.id}
               className="bg-[#FAF6E3] border border-gray-300 p-2 rounded-lg flex items-center gap-2 shadow-sm hover:bg-gray-200"
@@ -100,7 +102,7 @@ export default function Organize({ items }) {
 
       {/* ✅ ปุ่มเลื่อนหน้าและการ์ด */}
       {selectedItems.length > 0 && (
-        <div className="flex items-center mt-4">
+        <div className="flex items-center mt-4 justify-center w-full">
           {/* ✅ ปุ่มเลื่อนซ้าย (ถ้าหน้าแรกให้ปิดปุ่ม) */}
           <button
             className={`p-2 rounded-full shadow-lg mx-2 ${currentPage === 0 ? "opacity-50 cursor-not-allowed" : "bg-white"}`}
@@ -111,7 +113,7 @@ export default function Organize({ items }) {
           </button>
 
           {/* ✅ Container ที่มีการ์ด (แสดงทีละ 5) */}
-          <div className="flex gap-6 w-full justify-start px-2">
+          <div className="flex gap-10 w-[90%] justify-between">
             {visibleItems.map((item) => (
               <CardComponent
                 key={item.id}

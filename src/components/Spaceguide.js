@@ -23,7 +23,7 @@ export default function Spaceguide({ imageSrc, title, description, extraInfo }) 
   return (
     <>
       {/* ✅ เพิ่ม group เพื่อจัดการ hover */}
-      <div className="group relative w-full max-w-sm h-full flex border border-purple-600 rounded-[1rem] overflow-hidden shadow-lg cursor-pointer" onClick={() => setIsOpen(true)}>
+      <div className="group relative w-full max-w-sm h-full flex rounded-[1rem] overflow-hidden shadow-lg cursor-pointer" onClick={() => setIsOpen(true)}>
         <Image 
           src={imageSrc} 
           alt={title} 

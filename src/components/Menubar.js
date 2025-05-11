@@ -3,8 +3,7 @@ import { Afacad } from "next/font/google";
 import Image from "next/image";
 import Logo from "/public/Group 40.png";
 import { useRouter } from "next/router";
-import LoginModal from './Loginpopup';
-import SignupModal from './Signuppopup';
+import { LogOut } from 'lucide-react';
 
 const afacadFont = Afacad({
   subsets: ["latin"],
@@ -14,42 +13,17 @@ const afacadFont = Afacad({
 
 export default function Menubar({ 
   onLoginModalToggle, 
-  onSignupModalToggle 
+  onSignupModalToggle
 }) {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     const storedUsername = localStorage.getItem('username');
-    
-    if (storedToken) {
-      fetch('http://localhost:8000/check-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: storedToken }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.message === 'Token is valid') {
-            setIsLoggedIn(true);
-            setUsername(data.user?.username || storedUsername || '');
-          } else {
-            setIsLoggedIn(false);
-            setUsername('');
-          }
-        })
-        .catch((error) => {
-          setIsLoggedIn(false);
-          setUsername('');
-          console.error('Error:', error);
-        });
-    }
+    setIsLoggedIn(!!token);
+    setUsername(storedUsername || '');
   }, []);
 
   const handleLogout = () => {
@@ -61,64 +35,17 @@ export default function Menubar({
   };
 
   const handleProtectedRoute = (route) => {
-    if (isLoggedIn) {
+    const token = localStorage.getItem('token');
+    if (token) {
       router.push(route);
     } else {
-      setShowLoginModal(true);
-      
-      // Inform parent component about login modal
-      if (onLoginModalToggle) {
-        onLoginModalToggle(true);
-      }
-    }
-  };
-
-  const handleSuccessfulLogin = (username, token) => {
-    setIsLoggedIn(true);
-    setUsername(username);
-    setShowLoginModal(false);
-    
-    // Inform parent component about login modal closing
-    if (onLoginModalToggle) {
-      onLoginModalToggle(false);
-    }
-  };
-
-  const handleSuccessfulSignup = (username, token) => {
-    setIsLoggedIn(true);
-    setUsername(username);
-    setShowSignupModal(false);
-    
-    // Inform parent component about signup modal closing
-    if (onSignupModalToggle) {
-      onSignupModalToggle(false);
-    }
-  };
-
-  const toggleLoginModal = (show) => {
-    setShowLoginModal(show);
-    setShowSignupModal(false);
-    
-    // Inform parent component about login modal
-    if (onLoginModalToggle) {
-      onLoginModalToggle(show);
-    }
-  };
-
-  const toggleSignupModal = (show) => {
-    setShowSignupModal(show);
-    setShowLoginModal(false);
-    
-    // Inform parent component about signup modal
-    if (onSignupModalToggle) {
-      onSignupModalToggle(show);
+      if (onLoginModalToggle) onLoginModalToggle(true);
     }
   };
 
   return (
     <div className={`${afacadFont.variable} font-afacad p-4`}>
-      {/* Existing Menubar code remains the same */}
-      <div className="flex justify-between border border-red-500">
+      <div className="flex justify-between">
         <button onClick={() => router.push("/Home")} className="w-[10%] h-[10%]">
           <Image src={Logo} alt="Logo" />
         </button>
@@ -134,46 +61,36 @@ export default function Menubar({
               <h1 className="text text-white">Ideas</h1>
             </button>
           </div>
-          <div className="flex justify-around items-center m-2 w-[30%] bg-[#B59F78] rounded-[10px]">
-            {isLoggedIn ? (
+          {/* ปุ่ม Login/Sign Up หรือ User */}
+          {isLoggedIn ? (
+            <div className="flex justify-around items-center m-2 max-w-[30%] bg-[#B59F78] rounded-[10px]">
               <div className="flex items-center w-full justify-between px-4">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-full mr-2"></div>
-                  <span className="text-white font-bold">{username}</span>
+                  <span className="text-white font-bold text-[20pt] mr-4">{username}</span>
                 </div>
-                <button onClick={handleLogout} className="text-white font-bold">Logout</button>
+                <button onClick={handleLogout} className="text-white font-bold">
+                  <LogOut />
+                </button>
               </div>
-            ) : (
-              <div>
-                <button onClick={() => toggleLoginModal(true)} className="font-bold text-[24pt] text-white">Login</button>
-                <button onClick={() => toggleSignupModal(true)} className="font-bold text-[24pt] text-white ml-4">Sign Up</button>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex justify-around items-center m-2 w-[30%] bg-[#B59F78] rounded-[10px]">
+              <button 
+                onClick={() => onLoginModalToggle && onLoginModalToggle(true)} 
+                className="font-bold text-[24pt] text-white"
+              >
+                Login
+              </button>
+              <button 
+                onClick={() => onSignupModalToggle && onSignupModalToggle(true)} 
+                className="font-bold text-[24pt] text-white ml-4"
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Login Modal Component */}
-      <LoginModal 
-        isOpen={showLoginModal}
-        onClose={() => toggleLoginModal(false)}
-        onSwitchToSignup={() => {
-          toggleLoginModal(false);
-          toggleSignupModal(true);
-        }}
-        onSuccessfulLogin={handleSuccessfulLogin}
-      />
-
-      {/* Signup Modal Component */}
-      <SignupModal 
-        isOpen={showSignupModal}
-        onClose={() => toggleSignupModal(false)}
-        onSwitchToLogin={() => {
-          toggleSignupModal(false);
-          toggleLoginModal(true);
-        }}
-        onSuccessfulSignup={handleSuccessfulSignup}
-      />
     </div>
   );
 }
