@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Popup from "./PopupCard";
 
-export default function Spaceguide({ imageSrc, title, description, extraInfo }) {
+export default function Spaceguide({ imageSrc, title, description, extraInfo, isMobile = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isTitleOverflow, setIsTitleOverflow] = useState(false);
   const [isDescOverflow, setIsDescOverflow] = useState(false);
@@ -39,13 +39,22 @@ export default function Spaceguide({ imageSrc, title, description, extraInfo }) 
           <div className="relative">
             <h3
               ref={titleRef}
-              className="text-black text-[24pt] font-bold truncate w-[200px]"
+              className={`text-black font-bold ${
+                isMobile 
+                  ? 'text-[16pt] w-[150px]' 
+                  : 'text-[24pt] w-[200px]'
+              }`}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
             >
               {title}
             </h3>
             {/* ✅ Tooltip สำหรับชื่อ */}
             {isTitleOverflow && (
-              <div className="invisible group-hover:visible absolute bottom-full left-0 bg-black text-white text-sm p-2 rounded-md shadow-md w-auto max-w-xs">
+              <div className="invisible group-hover:visible absolute bottom-full left-0 bg-black text-white text-sm p-2 rounded-md shadow-md w-auto max-w-xs z-20 whitespace-normal">
                 {title}
               </div>
             )}
@@ -55,13 +64,22 @@ export default function Spaceguide({ imageSrc, title, description, extraInfo }) 
           <div className="relative mt-1">
             <p
               ref={descRef}
-              className="text-black font-bold text-md truncate w-[200px]"
+              className={`text-black font-bold ${
+                isMobile 
+                  ? 'text-[12pt] w-[150px]' 
+                  : 'text-md w-[200px]'
+              }`}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
             >
               {description}
             </p>
             {/* ✅ Tooltip สำหรับ description */}
             {isDescOverflow && (
-              <div className="invisible group-hover:visible absolute bottom-full left-0 bg-black text-white text-sm p-2 rounded-md shadow-md w-auto max-w-xs">
+              <div className="invisible group-hover:visible absolute bottom-full left-0 bg-black text-white text-sm p-2 rounded-md shadow-md w-auto max-w-xs z-20 whitespace-normal">
                 {description}
               </div>
             )}

@@ -32,6 +32,7 @@ export default function Menubar({
     setIsLoggedIn(false);
     setUsername('');
     router.push('/Home');
+    window.location.reload(); // เพิ่ม reload เพื่อ refresh หน้า
   };
 
   const handleProtectedRoute = (route) => {
@@ -44,8 +45,70 @@ export default function Menubar({
   };
 
   return (
-    <div className={`${afacadFont.variable} font-afacad p-4`}>
-      <div className="flex justify-between">
+    <div className={`${afacadFont.variable} font-afacad pt-1 pb-1 pl-4 pr-4`}>
+      {/* Mobile: Logo ใหญ่ขึ้น, อื่นๆเหมือนเดิม */}
+      <div className="flex flex-row items-center justify-between w-full md:hidden">
+        {/* Logo ซ้าย (ใหญ่ขึ้นอีก) */}
+        <div className="flex items-center flex-shrink-0">
+          <button onClick={() => router.push("/Home")} className="w-[80px] h-[80px]">
+            <Image src={Logo} alt="Logo" />
+          </button>
+        </div>
+        {/* เมนูตรงกลาง */}
+        <div className="flex flex-row items-center justify-center flex-1 mx-2 gap-4">
+          <button
+            onClick={() => handleProtectedRoute("/Organize")}
+            className="font-bold text-[13pt] text-[#2A3663] hover:underline"
+            style={{ fontWeight: 700 }}
+          >
+            Organize
+          </button>
+          <button
+            onClick={() => handleProtectedRoute("/Todolist")}
+            className="font-bold text-[13pt] text-[#2A3663] hover:underline"
+            style={{ fontWeight: 700 }}
+          >
+            To-Do
+          </button>
+          <button
+            onClick={() => handleProtectedRoute("/Ideas")}
+            className="font-bold text-[13pt] text-[#2A3663] hover:underline"
+            style={{ fontWeight: 700 }}
+          >
+            Ideas
+          </button>
+        </div>
+        {/* Profile/ปุ่ม Login/Signup ขวา */}
+        <div className="flex-shrink-0 flex items-center">
+          {isLoggedIn ? (
+            <div className="flex items-center bg-[#B59F78] rounded-[10px] px-3 py-1 min-w-[70px] justify-center">
+              <span className="text-white font-bold text-[13pt]">{username}</span>
+              <button onClick={handleLogout} className="text-white ml-2">
+                <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-end">
+              <button
+                onClick={() => onLoginModalToggle && onLoginModalToggle(true)}
+                className="bg-[#B59F78] rounded-[10px] px-3 py-1 font-bold text-[11pt] text-white w-[80px] mb-1"
+                style={{ fontWeight: 700 }}
+              >
+                Login
+              </button>
+              <button
+                onClick={() => onSignupModalToggle && onSignupModalToggle(true)}
+                className="bg-[#B59F78] rounded-[10px] px-3 py-1 font-bold text-[11pt] text-white w-[80px]"
+                style={{ fontWeight: 700 }}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Desktop: original */}
+      <div className="hidden md:flex justify-between">
         <button onClick={() => router.push("/Home")} className="w-[10%] h-[10%]">
           <Image src={Logo} alt="Logo" />
         </button>
