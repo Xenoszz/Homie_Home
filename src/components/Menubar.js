@@ -31,8 +31,11 @@ export default function Menubar({
     localStorage.removeItem("username");
     setIsLoggedIn(false);
     setUsername('');
-    router.push('/Home');
-    window.location.reload(); // เพิ่ม reload เพื่อ refresh หน้า
+    if (router.pathname !== '/Home') {
+      router.push('/Home').then(() => window.location.reload());
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleProtectedRoute = (route) => {

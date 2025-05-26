@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 
-const CANVAS_SIZE = 400;
-const RADIUS = CANVAS_SIZE / 2;
-const COLORS = [
-  '#A7C7E7', '#B5EAD7', '#FFFACD', '#FFB7B2', '#CBAACB', '#FFDAC1', '#B5EAD7', '#E2F0CB', '#FFB347', '#B0E0E6', '#FFD1DC', '#F3E2A9', '#B39EB5', '#FF6961', '#77DD77', '#AEC6CF', '#FDFD96', '#CFCFC4', '#836953', '#779ECB'
-];
+export default function CanvasTaskWheel({ tasks, onSelectIndex, canvasSize }) {
+  const CANVAS_SIZE = canvasSize || 400;
+  const RADIUS = CANVAS_SIZE / 2;
+  const COLORS = [
+    '#A7C7E7', '#B5EAD7', '#FFFACD', '#FFB7B2', '#CBAACB', '#FFDAC1', '#B5EAD7', '#E2F0CB', '#FFB347', '#B0E0E6', '#FFD1DC', '#F3E2A9', '#B39EB5', '#FF6961', '#77DD77', '#AEC6CF', '#FDFD96', '#CFCFC4', '#836953', '#779ECB'
+  ];
 
-export default function CanvasTaskWheel({ tasks, onSelectIndex }) {
   const canvasRef = useRef(null);
   const [rotation, setRotation] = useState(0); // องศาปัจจุบัน
   const [spinning, setSpinning] = useState(false);
@@ -177,4 +177,4 @@ export default function CanvasTaskWheel({ tasks, onSelectIndex }) {
       )}
     </div>
   );
-} 
+}

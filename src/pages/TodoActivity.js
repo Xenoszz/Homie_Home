@@ -187,7 +187,143 @@ export default function TodoActivity() {
                     </h1>
                 </div>
                 
-                <div className="flex flex-col md:flex-row gap-6">
+                {/* Mobile layout */}
+                <div className="block md:hidden">
+                    {/* Task List - Top */}
+                    <div className="bg-white rounded-lg shadow-md p-4 mb-4" style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold text-[#58482D]">To do list</h2>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                room?.progress >= 75 ? 'bg-green-100 text-green-800' :
+                                room?.progress >= 40 ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
+                                {room?.progress || 0}% Complete
+                            </span>
+                        </div>
+                        <div className="space-y-2 mb-4 max-h-[180px] overflow-y-auto">
+                            {tasks.map((task) => (
+                                <div
+                                key={task._id}
+                                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 hover:bg-gray-50 ${highlightedTaskId === task._id ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md' : ''}`}
+                              > 
+                                    {/* Checkbox */}
+                                    <div 
+                                        className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-3 border ${
+                                            task.completed 
+                                                ? 'bg-green-500 border-green-600 text-white' 
+                                                : 'border-gray-400 bg-white hover:bg-gray-100'
+                                        }`}
+                                        onClick={() => handleToggleTask(task._id, task.completed)}
+                                    >
+                                        {task.completed && '✓'}
+                                    </div>
+                                    
+                                    {/* Task Name */}
+                                    {editTaskId === task._id ? (
+                                        <div className="flex-1 flex items-center">
+                                            <input
+                                                type="text"
+                                                value={editTaskName}
+                                                onChange={(e) => setEditTaskName(e.target.value)}
+                                                className="flex-1 p-2 border rounded mr-2"
+                                                autoFocus
+                                            />
+                                            <button 
+                                                onClick={saveTaskEdit}
+                                                className="p-1 text-green-600 hover:text-green-800 mr-1"
+                                            >
+                                                <Save size={18} />
+                                            </button>
+                                            <button 
+                                                onClick={() => setEditTaskId(null)}
+                                                className="p-1 text-red-600 hover:text-red-800"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span className={`flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
+                                                {task.name}
+                                            </span>
+                                            
+                                            {/* Action Buttons */}
+                                            <div className="flex space-x-2">
+                                                <button 
+                                                    onClick={() => handleEditTask(task._id, task.name)}
+                                                    className="p-1 text-blue-600 hover:text-blue-800"
+                                                >
+                                                    <Edit size={18} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteTask(task._id)}
+                                                    className="p-1 text-red-600 hover:text-red-800"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                            {tasks.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    No tasks added yet
+                                </div>
+                            )}
+                        </div>
+                        {/* Add Task Input */}
+                        {isAddingTask ? (
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="text"
+                                    value={newTaskName}
+                                    onChange={(e) => setNewTaskName(e.target.value)}
+                                    placeholder="Enter task name"
+                                    className="flex-1 p-2 border rounded mr-2"
+                                    autoFocus
+                                />
+                                <button 
+                                    onClick={handleAddTask}
+                                    className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 mr-1"
+                                >
+                                    <Save size={18} />
+                                </button>
+                                <button 
+                                    onClick={() => setIsAddingTask(false)}
+                                    className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={() => setIsAddingTask(true)}
+                                className="flex items-center justify-center w-full p-2 border-2 border-dashed border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                <Plus size={20} className="mr-2" />
+                                <span>Add task</span>
+                            </button>
+                        )}
+                    </div>
+                    {/* Task Wheel - Bottom */}
+                    <div className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center">
+                        <h2 className="text-lg font-semibold text-[#58482D] mb-4">Task Wheel</h2>
+                        <div style={{ width: 200, height: 200 }}>
+                            <CanvasTaskWheel
+                                tasks={tasks.filter(task => !task.completed)}
+                                onSelectIndex={idx => {
+                                    const incomplete = tasks.filter(task => !task.completed);
+                                    setHighlightedTaskId(incomplete[idx]?._id || null);
+                                }}
+                                canvasSize={200}
+                            />
+                        </div>
+                    </div>
+                </div>
+                {/* Desktop layout (unchanged) */}
+                <div className="hidden md:flex flex-col md:flex-row gap-6">
                     {/* Task List - Left Side */}
                     <div className="flex-1 bg-white rounded-lg shadow-md p-6">
                         <div className="flex justify-between items-center mb-4">
