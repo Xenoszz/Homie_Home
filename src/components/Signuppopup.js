@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PopupOTP from './PopupOTP';
+import { fetchDataApi } from "@/utils/api";
 
 export default function Signuppopup({ 
   isOpen, 
@@ -15,7 +15,6 @@ export default function Signuppopup({
   const [lastname, setLastname] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
   const handleSignup = async (e) => {
@@ -35,87 +34,62 @@ export default function Signuppopup({
       setIsRegistering(true);
       
       // First check if user already exists
-      const resCheckUser = await fetch("http://localhost:8000/api/auth/checkuser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.toLowerCase() }),
+      const checkUserResult = await fetchDataApi('POST', 'auth/checkuser', { 
+        email: email.toLowerCase() 
       });
 
-      if (!resCheckUser.ok) {
-        setError("Failed to check user.");
-        setIsRegistering(false);
+      if (checkUserResult.error) {
+        setError(checkUserResult.error);
         return;
       }
 
-      const { user } = await resCheckUser.json();
-      if (user) {
+      if (checkUserResult.user) {
         setError("User already exists");
-        setIsRegistering(false);
         return;
       }
 
-      // If user doesn't exist, proceed to OTP verification
-      setError("");
-      setShowOtpPopup(true);
+      // If user doesn't exist, proceed with registration
+      const registerResult = await fetchDataApi('POST', 'auth/register', { 
+          username, 
+          email: email.toLowerCase(), 
+          password,
+          firstname,
+          lastname
+      });
+
+      if (registerResult.error) {
+        setError(registerResult.error);
+        return;
+      }
+
+        setError("");
+        setSuccess("User registration successful!");
+        
+        // Store user data if needed
+      if (registerResult.token) {
+        localStorage.setItem('token', registerResult.token);
+          localStorage.setItem('username', username);
+        }
+        
+        // Notify parent component about successful signup
+        if (onSuccessfulSignup) {
+        onSuccessfulSignup(username, registerResult.token);
+        }
+        
+        // Close the modal after successful signup
+        onClose();
       
     } catch (error) {
-      console.error("Error during pre-registration check: ", error);
+      console.error("Error during registration: ", error);
       setError("An error occurred. Please try again.");
     } finally {
       setIsRegistering(false);
     }
   };
 
-  const handleOtpSuccess = async (token) => {
-    try {
-      // Register the user after OTP verification
-      const resRegister = await fetch("http://localhost:8000/api/auth/register", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          username, 
-          email: email.toLowerCase(), 
-          password,
-          firstname,
-          lastname
-        }),
-      });
-
-      const data = await resRegister.json();
-
-      if (resRegister.ok) {
-        setError("");
-        setSuccess("User registration successful!");
-        
-        // Store user data if needed
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('username', username);
-        }
-        
-        // Notify parent component about successful signup
-        if (onSuccessfulSignup) {
-          onSuccessfulSignup(username, data.token || token);
-        }
-        
-        // Close the modal after successful signup
-        onClose();
-      } else {
-        setError(data.message || "Registration failed, please try again.");
-      }
-    } catch (error) {
-      console.error("Error during registration: ", error);
-      setError("An error occurred during registration.");
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
-    <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white p-8 rounded-lg w-96 relative">
           <button onClick={onClose} className="absolute top-2 right-2 text-2xl">×</button>
@@ -206,15 +180,5 @@ export default function Signuppopup({
           </p>
         </div>
       </div>
-
-      <PopupOTP
-        isOpen={showOtpPopup}
-        onClose={() => setShowOtpPopup(false)}
-        email={email}
-        password={password}
-        username={username}
-        onVerificationSuccess={handleOtpSuccess}
-      />
-    </>
   );
 }

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 export default function PopupOTP({ 
   isOpen, 
   onClose, 
-  email,
   password,
   onVerificationSuccess,
   username
@@ -27,10 +26,10 @@ export default function PopupOTP({
 
   // Automatically send OTP when popup opens
   useEffect(() => {
-    if (isOpen && email) {
+    if (isOpen && username) {
       sendOTP();
     }
-  }, [isOpen, email]);
+  }, [isOpen, username]);
 
   const sendOTP = async () => {
     setLoading(true);
@@ -41,7 +40,7 @@ export default function PopupOTP({
       const response = await fetch('http://localhost:8000/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ username })
       });
       
       if (response.ok) {
@@ -76,7 +75,7 @@ export default function PopupOTP({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          email,
+          username,
           otp,
           password
         })
@@ -127,7 +126,7 @@ export default function PopupOTP({
         <h2 className="text-2xl mb-4 text-center">Verify Your Email</h2>
         
         <p className="mb-6 text-center text-gray-600">
-          We've sent a verification code to <span className="font-medium">{email}</span>
+          We've sent a verification code to <span className="font-medium">{username}</span>
         </p>
         
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
