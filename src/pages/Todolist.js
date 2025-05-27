@@ -3,7 +3,8 @@ import { SquarePlus, CircleX, Edit, Loader } from 'lucide-react';
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import axios from "axios";
+import { fetchDataApi, sendDataApi } from "@/utils/api";
+
 
 export default function Todolist() {
     const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function Todolist() {
     const [editName, setEditName] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
+
 
     // Pre-defined room templates
     const roomTemplates = [
@@ -44,19 +46,17 @@ export default function Todolist() {
 
     // Check authentication and fetch rooms
     useEffect(() => {
+        const token = localStorage.getItem('token');
         const checkAuth = async () => {
-            const token = localStorage.getItem('token');
             if (!token) {
                 router.push('/login');
                 return;
             }
-
+            
             try {
-                const response = await axios.post('http://localhost:8000/check-token', {
-                    token
-                });
+                const response = await fetchDataApi('POST', 'auth/check-token', { token });
                 
-                if (response.status === 200) {
+                if (response.message === 'Token is valid') {
                     setIsAuthenticated(true);
                     fetchRooms();
                 } else {
@@ -77,12 +77,13 @@ export default function Todolist() {
     const fetchRooms = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/rooms', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setRooms(response.data);
+            const headers = {
+                'Authorization': `Bearer ${token}`
+              };
+            const data = await fetchDataApi('GET', 'room/get', {}, headers);
+            console.log(data);
+            console.log("getroomToken",token);
+            setRooms(data);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching rooms:", error);
@@ -92,36 +93,25 @@ export default function Todolist() {
 
     // Handle room selection and creation
     const handleRoomSelection = async (roomTemplate) => {
+        const token = localStorage.getItem('token');
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8000/api/rooms', 
-                { 
-                    name: roomTemplate.name,
-                    image: roomTemplate.img  // ส่ง image path ไปยัง API
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-            
+            const headers = {'Authorization': `Bearer ${token}`};
+            const response = await fetchDataApi('POST', 'room/create', {name: roomTemplate.name,image: roomTemplate.img}, headers);
+            console.log("createToken",token);
             // Add the new room to the state
-            setRooms([...rooms, response.data]);
+            setRooms([...rooms, response]);
             setIsOpen(false);
         } catch (error) {
             console.error("Error creating room:", error);
         }
     };
+
     // Remove room
     const removeRoom = async (roomId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8000/api/rooms/${roomId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            const headers = {'Authorization': `Bearer ${token}`};
+            await sendDataApi('DELETE', `room/delete/${roomId}`, {}, headers);
             
             // Remove room from state
             setRooms(rooms.filter(room => room._id !== roomId));
@@ -150,15 +140,10 @@ export default function Todolist() {
         if (!editName.trim()) return;
         
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:8000/api/rooms/${roomId}`, 
-                { name: editName },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
+            const token = localStorage.getItem('token');            
+            const response = await sendDataApi('PUT', `room/update/${roomId}`, { name: editName }, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             
             // Update room in state
             setRooms(rooms.map(room => 

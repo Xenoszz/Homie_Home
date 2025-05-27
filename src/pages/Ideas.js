@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Image from "next/image";
 import Menubar from "@/components/Menubar";
 import SearchIcon from "/public/Search_alt_fill.png";
 import IdeaCard from "@/components/Ideacard";
+import { fetchDataApi } from "@/utils/api";
 
 export default function Ideas() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,9 +12,16 @@ export default function Ideas() {
 
   // ดึงข้อมูลจาก API
   useEffect(() => {
-    axios.get("http://localhost:8000/api/idea")
-      .then(response => setItems(response.data))
-      .catch(error => console.error("Error fetching data:", error));
+    const fetchIdeas = async () => {
+      try {
+        const data = await fetchDataApi('GET', 'idea/get');
+        setItems(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchIdeas();
   }, []);
 
   // ค้นหาข้อมูล
