@@ -1,15 +1,23 @@
 import { sendDataApi } from './api';
 import { getStoredToken } from './auth';
 
-export const createRoom = async (roomTemplate, setRooms, rooms, setIsOpen) => {
+// Helper functions
+const getAuthHeaders = () => {
     const token = getStoredToken();
     if (!token) {
-        console.error("No token found");
-        return;
+        throw new Error('No token found');
     }
+    return { 'Authorization': `Bearer ${token}` };
+};
 
+const handleApiError = (error, operation) => {
+    console.error(`Error ${operation}:`, error);
+    throw error;
+};
+
+export const createRoom = async (roomTemplate, setRooms, rooms, setIsOpen) => {
     try {
-        const headers = {'Authorization': `Bearer ${token}`};
+        const headers = getAuthHeaders();
         const response = await sendDataApi('POST', 'room/create', {
             name: roomTemplate.name,
             image: roomTemplate.img
@@ -22,20 +30,13 @@ export const createRoom = async (roomTemplate, setRooms, rooms, setIsOpen) => {
             console.error("Error creating room:", response?.error);
         }
     } catch (error) {
-        console.error("Error creating room:", error);
+        handleApiError(error, 'creating room');
     }
 };
 
-
 export const removeRoom = async (roomId, setRooms, rooms) => {
-    const token = getStoredToken();
-    if (!token) {
-        console.error("No token found");
-        return;
-    }
-
     try {
-        const headers = {'Authorization': `Bearer ${token}`};
+        const headers = getAuthHeaders();
         const response = await sendDataApi('DELETE', `room/delete/${roomId}`, {}, headers);
 
         if (response && !response.error) {
@@ -44,21 +45,15 @@ export const removeRoom = async (roomId, setRooms, rooms) => {
             console.error("Error deleting room:", response?.error);
         }
     } catch (error) {
-        console.error("Error deleting room:", error);
+        handleApiError(error, 'deleting room');
     }
 };
 
 export const updateRoomName = async (roomId, newName, setRooms, rooms, setEditMode) => {
     if (!newName.trim()) return;
 
-    const token = getStoredToken();
-    if (!token) {
-        console.error("No token found");
-        return;
-    }
-
     try {
-        const headers = {'Authorization': `Bearer ${token}`};
+        const headers = getAuthHeaders();
         const response = await sendDataApi('PUT', `room/update/${roomId}`, 
             { name: newName }, 
             headers
@@ -73,6 +68,55 @@ export const updateRoomName = async (roomId, newName, setRooms, rooms, setEditMo
             console.error("Error updating room name:", response?.error);
         }
     } catch (error) {
-        console.error("Error updating room name:", error);
+        handleApiError(error, 'updating room name');
+    }
+};
+
+export const createTask = async (roomId, taskName) => {
+    try {
+        const headers = getAuthHeaders();
+        const response = await sendDataApi('POST', `task/create/${roomId}`, 
+            { name: taskName },
+            headers
+        );
+        return response;
+    } catch (error) {
+        handleApiError(error, 'creating task');
+    }
+};
+
+export const toggleTask = async (taskId, isCompleted) => {
+    try {
+        const headers = getAuthHeaders();
+        const response = await sendDataApi('PUT', `task/update/${taskId}`, 
+            { completed: !isCompleted },
+            headers
+        );
+        return response;
+    } catch (error) {
+        handleApiError(error, 'toggling task');
+    }
+};
+
+export const updateTaskName = async (taskId, newName) => {
+    try {
+        const headers = getAuthHeaders();
+        const response = await sendDataApi('PUT', `task/update/${taskId}`, 
+            { name: newName },
+            headers
+        );
+        return response;
+    } catch (error) {
+        handleApiError(error, 'updating task name');
+    }
+};
+
+export const deleteTask = async (taskId) => {
+    try {
+        const headers = getAuthHeaders();
+        await sendDataApi('DELETE', `task/delete/${taskId}`, {}, headers);
+        return true;
+    } catch (error) {
+        handleApiError(error, 'deleting task');
     }
 }; 
