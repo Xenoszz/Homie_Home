@@ -1,12 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import Menubar from "@/components/Menubar";
-import Spaceguide from "@/components/Spaceguide";
 import { useRouter } from "next/router";
-import LoginModal from "@/components/Loginpopup";
-import SignupModal from "@/components/Signuppopup";
+import LoginModal from "@/components/auth/Loginpopup";
+import SignupModal from "@/components/auth/Signuppopup";
 import { checkLoginStatus, setLoginData, clearLoginData, getStoredToken, handleProtectedRoute } from "@/utils/auth";
 import { groupSpaceData, calculateOverallProgress } from "@/utils/calculations";
-import { ProgressCircle } from "@/components/home/ProgressCircle";
 import { fetchRooms, fetchSpaceGuide } from "@/utils/fetchData";
 import { Dashboard } from "@/components/home/Dashboard";
 import { SpaceGuideSection } from "@/components/home/SpaceGuideSection";
