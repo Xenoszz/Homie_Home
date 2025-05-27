@@ -2,9 +2,9 @@ import Menubar from "@/components/Menubar";
 import { ArrowLeft, Edit, Trash2, Plus, Save, X, Loader } from 'lucide-react';
 import { useRouter } from "next/router";
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import CanvasTaskWheel from "@/components/CanvasTaskWheel";
+import { fetchDataApi, sendDataApi } from "@/utils/api";
 
 export default function TodoActivity() {
     const router = useRouter();
@@ -35,13 +35,11 @@ export default function TodoActivity() {
             const { roomId } = router.query;
             
             // Fetch room details
-            const roomResponse = await axios.get(`http://localhost:8000/api/rooms`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+            const roomResponse = await fetchDataApi('GET', 'room/get', {}, {
+                'Authorization': `Bearer ${token}`
             });
             
-            const roomData = roomResponse.data.find(r => r._id === roomId);
+            const roomData = roomResponse.find(r => r._id === roomId);
             if (!roomData) {
                 console.error("Room not found");
                 router.push('/Todolist');
@@ -51,13 +49,11 @@ export default function TodoActivity() {
             setRoom(roomData);
             
             // Fetch tasks for this room
-            const tasksResponse = await axios.get(`http://localhost:8000/api/rooms/${roomId}/tasks`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+            const tasksResponse = await fetchDataApi('GET', `task/get/${roomId}`, {}, {
+                'Authorization': `Bearer ${token}`
             });
             
-            setTasks(tasksResponse.data);
+            setTasks(tasksResponse);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching room data:", error);
@@ -74,16 +70,14 @@ export default function TodoActivity() {
         
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`http://localhost:8000/api/rooms/${room._id}/tasks`, 
+            const response = await fetchDataApi('POST', `task/create/${room._id}`, 
                 { name: newTaskName },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    'Authorization': `Bearer ${token}`
                 }
             );
             
-            setTasks([...tasks, response.data]);
+            setTasks([...tasks, response]);
             setNewTaskName("");
             setIsAddingTask(false);
             
@@ -97,17 +91,15 @@ export default function TodoActivity() {
     const handleToggleTask = async (taskId, isCompleted) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:8000/api/tasks/${taskId}`, 
+            const response = await sendDataApi('PUT', `task/update/${taskId}`, 
                 { completed: !isCompleted },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    'Authorization': `Bearer ${token}`
                 }
             );
             
             setTasks(tasks.map(task => 
-                task._id === taskId ? response.data : task
+                task._id === taskId ? response : task
             ));
             
             // Refresh room data to get updated progress
@@ -127,17 +119,15 @@ export default function TodoActivity() {
         
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:8000/api/tasks/${editTaskId}`, 
+            const response = await sendDataApi('PUT', `task/update/${editTaskId}`, 
                 { name: editTaskName },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    'Authorization': `Bearer ${token}`
                 }
             );
             
             setTasks(tasks.map(task => 
-                task._id === editTaskId ? response.data : task
+                task._id === editTaskId ? response : task
             ));
             setEditTaskId(null);
         } catch (error) {
@@ -148,10 +138,8 @@ export default function TodoActivity() {
     const handleDeleteTask = async (taskId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8000/api/tasks/${taskId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+            await sendDataApi('DELETE', `task/delete/${taskId}`, {}, {
+                'Authorization': `Bearer ${token}`
             });
             
             setTasks(tasks.filter(task => task._id !== taskId));

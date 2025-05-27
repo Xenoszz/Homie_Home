@@ -4,6 +4,24 @@ import Menubar from "@/components/Menubar";
 import SearchIcon from "/public/Search_alt_fill.png";
 import CardComponent from "@/components/Organizecard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { fetchDataApi } from "@/utils/api";
+
+// ใช้ getStaticProps ดึงข้อมูลจาก API
+export const getStaticProps = async () => {
+  try {
+    const data = await fetchDataApi('GET', 'organize/get');
+    return { 
+      props: { items: data }, 
+      revalidate: 10 
+    };
+  } catch (error) {
+    console.error('Error fetching organize data:', error);
+    return { 
+      props: { items: [] }, 
+      revalidate: 10 
+    };
+  }
+};
 
 export default function Organize({ items }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -138,12 +156,5 @@ export default function Organize({ items }) {
       )}
     </div>
   );
-}
-
-// ✅ ใช้ getStaticProps ดึงข้อมูลจาก API
-export async function getStaticProps() {
-  const res = await fetch("http://localhost:8000/api/organizeinfo");
-  const data = await res.json();
-  return { props: { items: data }, revalidate: 10 };
 }
 
