@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState, useEffect } from 'react';
+
 export default function OrganizeCard({ item, isSelected, onClick }) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -11,22 +12,85 @@ export default function OrganizeCard({ item, isSelected, onClick }) {
     return () => window.removeEventListener('resize', checkScreen);
   }, []);
 
+  // Mobile popup component
+  const MobilePopup = ({ onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-[90%] max-h-[80vh] overflow-y-auto p-6">
+        <h2 className="text-xl font-bold mb-4">{item.name}</h2>
+        <div className="mb-4">
+          <Image
+            src={item.imageSrc}
+            alt={item.name}
+            width={400}
+            height={300}
+            className="w-full h-48 object-cover rounded-lg"
+          />
+        </div>
+        <p className="text-gray-700 mb-4">{item.description}</p>
+        {/* Details section */}
+        <div className="space-y-4">
+          {item.details?.map((detail, idx) => (
+            <p key={idx} className="text-gray-600">{detail}</p>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="mt-6 w-full bg-[#B59F78] text-white py-2 rounded-lg"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <div
+          className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+          onClick={onClick}
+        >
+          <div className="relative h-32">
+            <Image
+              src={item.imageSrc}
+              alt={item.name}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="p-3">
+            <h3 className="font-bold text-[14pt] text-[#58482D] truncate">
+              {item.name}
+            </h3>
+            <p className="text-sm text-gray-600 truncate">{item.description}</p>
+          </div>
+        </div>
+        {isSelected && <MobilePopup onClose={() => onClick()} />}
+      </>
+    );
+  }
+
+  // Desktop version - unchanged
   return (
     <motion.div
-      initial={{ width: "30vh" }} // ปรับความกว้างเริ่มต้นให้มากขึ้น
-        animate={
-          isSelected
-            ? { width: isMobile ? '60vw' : '200vw' }
-            : { width: isMobile ? '40vw' : '60vw' }
-        }
+      initial={{ width: "30vh" }}
+      animate={
+        isSelected
+          ? { width: '600px' }
+          : { width: '250px' }
+      }
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`overflow-hidden flex flex-col md:flex-row relative cursor-pointer transition-all  
+      className={`overflow-hidden flex flex-col md:flex-row relative cursor-pointer transition-all
         ${!isSelected ? 'bg-white rounded-2xl shadow-md' : ''} 
-        ${isSelected ? 'h-[40vh] md:h-[50vh]' : 'h-auto md:h-[50vh]'} md:bg-white md:rounded-2xl md:shadow-md`}
+        ${isSelected ? 'h-[40vh] md:h-[450px]' : 'h-auto md:h-[450px]'} md:bg-white md:rounded-2xl md:shadow-md`}
       onClick={onClick}
     >
-      {/* ✅ รูปภาพ */}
-      <div className={`${isSelected ? 'hidden md:block' : 'block'} w-full md:w-full md:max-w-[350px] h-48 md:h-full relative ${!isSelected ? 'rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none' : ''}`}>
+      {/* รูปภาพ - ขนาดคงที่ */}
+      <div className={`
+        ${isSelected ? 'hidden md:block' : 'block'} 
+        w-full md:w-[250px] flex-shrink-0 h-48 md:h-full relative 
+        ${!isSelected ? 'rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none' : ''}`
+      }>
         <Image
           src={item.imageSrc}
           alt={item.name}
@@ -42,15 +106,13 @@ export default function OrganizeCard({ item, isSelected, onClick }) {
         </div>
       </div>
 
-      {/* ✅ ข้อมูล (แสดงเฉพาะเมื่อถูกเลือก) */}
+      {/* ข้อมูล - ส่วนที่ขยาย */}
       {isSelected && (
         <motion.div
           initial={{ width: 20, opacity: 0 }}
           animate={{ width: "100%", opacity: 1 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="bg-[#FAF3E0] p-6 shadow-lg rounded-r-2xl flex-1 overflow-y-auto 
-                    md:static md:flex-1 md:rounded-r-2xl 
-                    fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] h-[50%] rounded-2xl md:translate-x-0 md:translate-y-0 md:w-auto md:h-auto z-20"
+          className="bg-[#FAF3E0] p-6 shadow-lg rounded-r-2xl flex-1 overflow-y-auto"
         >
           <h2 className="text-lg md:text-xl font-bold">{item.description}</h2>
           <ul className="mt-2 list-disc pl-5 space-y-2 text-md">

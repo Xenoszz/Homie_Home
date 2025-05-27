@@ -4,10 +4,13 @@ import Menubar from "@/components/Menubar";
 import SearchIcon from "/public/Search_alt_fill.png";
 import CardComponent from "@/components/Organizecard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2 } from 'lucide-react';  // เพิ่ม Trash2
 
 export default function Organize({ items }) {
+  // State สำหรับการค้นหาและแสดงผล
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedItems, setSelectedItems] = useState(items);
+  const [searchResults, setSearchResults] = useState([]); // ผลการค้นหา
+  const [selectedItems, setSelectedItems] = useState([]); // รายการที่ผู้ใช้เลือก
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -34,66 +37,68 @@ export default function Organize({ items }) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // ✅ ค้นหาข้อมูล
+  // ฟังก์ชันค้นหา - แสดงเฉพาะผลการค้นหา
   const handleSearch = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
     if (term.trim() === "") {
-      setSelectedItems(items);
-      setCurrentPage(0);
+      setSearchResults([]);
     } else {
       const filtered = items.filter((item) =>
         item.name.toLowerCase().includes(term.toLowerCase())
       );
-      setSelectedItems(filtered);
-      setCurrentPage(0);
+      setSearchResults(filtered);
     }
   };
 
-  // ✅ เพิ่มไอเทม
+  // ฟังก์ชันเพิ่มไอเทมที่เลือก
   const addItem = (item) => {
     if (!selectedItems.some((i) => i.id === item.id)) {
       setSelectedItems([...selectedItems, item]);
-      setCurrentPage(Math.floor(selectedItems.length / itemsPerPage)); // อัปเดตหน้าล่าสุด
     }
   };
 
-  // ✅ ลบไอเทม
-  const removeItem = (index) => {
-    const newItems = selectedItems.filter((_, i) => i !== index);
-    setSelectedItems(newItems);
-    
-    // ✅ ปรับหน้าให้ถูกต้อง ถ้าลบแล้วอยู่หน้าสุดท้ายแต่ไม่มีการ์ด ต้องกลับไปหน้าแรก
-    if (newItems.length <= currentPage * itemsPerPage) {
-      setCurrentPage((prev) => Math.max(prev - 1, 0));
-    }
+  // ฟังก์ชัน Clear
+  const handleClear = () => {
+    setSelectedItems([]); // ล้างเฉพาะรายการที่เลือก
+    setSelectedItemId(null);
+    setSearchTerm(""); // ล้างคำค้นหา
+    setSearchResults([]); // ล้างผลการค้นหา
   };
 
-  // ✅ เลื่อนหน้า
+  // เพิ่มการคำนวณ startIndex และ endIndex
+  const calculatePagination = () => {
+    const start = currentPage * itemsPerPage;
+    const end = start + itemsPerPage;
+    return {
+      startIndex: start,
+      endIndex: Math.min(end, selectedItems.length)
+    };
+  };
+
+  const { startIndex, endIndex } = calculatePagination();
+
+  // แก้ไขฟังก์ชัน nextPage
   const nextPage = () => {
-    if ((currentPage + 1) * itemsPerPage < selectedItems.length) {
+    if (endIndex < selectedItems.length) {
       setCurrentPage(currentPage + 1);
     }
   };
 
+  // แก้ไขฟังก์ชัน prevPage
   const prevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
-  console.log('selectedItems:', selectedItems);
-  // ✅ คำนวณไอเทมที่จะแสดงในหน้านี้
-  const startIndex = currentPage * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const visibleItems = selectedItems.slice(startIndex, endIndex);
-  const itemsToRender = isMobile ? selectedItems : visibleItems;
+
   return (
-    <div className="min-h-[100vh] w-[100vw] border border-yellow-700 overflow-y-auto">
+    <div className="min-h-[100vh] w-[100vw]  overflow-y-auto">
       <Menubar />
       <h1 className="text-[24pt] md:text-[36pt] font-bold m-2 md:m-4">Organize</h1>
 
-      {/* Search Bar */}
-      <div className="flex items-center gap-4">
+      {/* Search Bar with Clear Button */}
+      <div className="flex items-center gap-2 md:gap-3">  {/* ลด gap จาก 4 เป็น 2 สำหรับ mobile และ 3 สำหรับ desktop */}
         <div className="flex items-center border-2 md:border-4 rounded-lg md:rounded-xl border-[#4F4534] bg-[#FAF6E3] p-1 md:p-2 ml-2 md:ml-4 w-full md:w-[30%]">
           <input
             type="text"
@@ -104,73 +109,36 @@ export default function Organize({ items }) {
           />
           <Image src={SearchIcon} alt="search" width={20} height={20} />
         </div>
+        {/* Clear Button */}
+        <button 
+          onClick={handleClear}
+          className="flex items-center gap-1 md:gap-2 p-1 md:p-2 rounded-lg bg-[#FAF6E3] border-2 border-[#4F4534] hover:bg-gray-100 transition-colors mr-2 md:mr-4" /* เพิ่ม margin-right */
+        >
+          <Trash2 size={isMobile ? 16 : 20} className="text-[#4F4534]" />
+          <span className="text-[#4F4534] font-medium text-sm md:text-base">Clear</span>
+        </button>
       </div>
 
-      {/* หมวดหมู่ปุ่ม */}
-      
-{selectedItems.length > 0 && (
-  <div className="flex items-center gap-1 md:gap-3 mt-4 md:mt-7 mb-4 md:mb-7 ml-2 md:ml-4">
-    {/* ปุ่มเลื่อนซ้าย - แสดงเฉพาะบนมือถือ */}
-    {isMobile && (
-      <button
-      onClick={scrollLeft}
-      className="p-1 bg-white rounded-full shadow-md flex items-center justify-center"
-      aria-label="Scroll Left"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4 text-gray-500"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    )}
+      {/* แสดงผลการค้นหา */}
+      {searchTerm && searchResults.length > 0 && (
+        <div className="flex items-center gap-1 md:gap-3 mt-4 md:mt-7 mb-4 md:mb-7 ml-2 md:ml-4">
+          <div ref={scrollRef} className="flex gap-2 md:gap-3 flex-nowrap overflow-x-auto scrollbar-hide flex-1">
+            {searchResults.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => addItem(item)}
+                className="bg-[#FAF6E3] border border-gray-300 p-1 md:p-2 rounded-md md:rounded-lg flex items-center gap-1 md:gap-2 shadow-sm hover:bg-gray-200 text-sm md:text-base flex-shrink-0"
+              >
+                {item.name} <span className="text-purple-600 font-bold">+</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-    {/* container ปุ่มหมวดหมู่ (scrollable) */}
-    <div
-      ref={scrollRef}
-      className="flex gap-2 md:gap-3 flex-nowrap overflow-x-auto scrollbar-hide flex-1"
-      style={{ scrollBehavior: "smooth" }}
-    >
-      {selectedItems.map((item) => (
-        <button
-          key={item.id}
-          className="bg-[#FAF6E3] border border-gray-300 p-1 md:p-2 rounded-md md:rounded-lg flex items-center gap-1 md:gap-2 shadow-sm hover:bg-gray-200 text-sm md:text-base flex-shrink-0"
-          onClick={() => addItem(item)}
-        >
-          {item.name} <span className="text-purple-600 font-bold">+</span>
-        </button>
-      ))}
-    </div>
-
-    {/* ปุ่มเลื่อนขวา - แสดงเฉพาะบนมือถือ */}
-    {isMobile && (
-        <button
-        onClick={scrollRight}
-        className="p-1 bg-white rounded-full shadow-md flex items-center justify-center"
-        aria-label="Scroll Right"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 text-gray-500"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    )}
-  </div>
-)}
-
-      {/* ปุ่มเลื่อนหน้าและการ์ด */}
+      {/* แสดงการ์ดที่เลือกเท่านั้น */}
       {selectedItems.length > 0 && (
         <div className="flex items-center mt-4 justify-center w-full">
-          {/* ปุ่มเลื่อนซ้าย */}
           {!isMobile && (
             <button
               className={`p-2 rounded-full shadow-lg mx-2 ${
@@ -183,21 +151,22 @@ export default function Organize({ items }) {
             </button>
           )}
 
-          {/* การ์ด */}
-          <div className={`grid grid-cols-2 md:flex md:flex-row gap-4 md:gap-10 w-[90%] justify-between`}>
-            {itemsToRender.map((item) => (
+          <div className={`
+            ${isMobile 
+              ? 'grid grid-cols-2 gap-4 px-4' 
+              : 'flex flex-row gap-4 md:gap-4 w-[90%] justify-center items-center'
+            }
+          `}>
+            {selectedItems.slice(startIndex, endIndex).map((item) => (
               <CardComponent
                 key={item.id}
                 item={item}
                 isSelected={selectedItemId === item.id}
-                onClick={() =>
-                  setSelectedItemId(selectedItemId === item.id ? null : item.id)
-                }
+                onClick={() => setSelectedItemId(selectedItemId === item.id ? null : item.id)}
               />
             ))}
           </div>
 
-          {/* ปุ่มเลื่อนขวา */}
           {!isMobile && (
             <button
               className={`p-2 rounded-full shadow-lg mx-2 ${

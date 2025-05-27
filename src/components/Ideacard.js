@@ -25,8 +25,9 @@ export default function IdeaCard({ item }) {
             className="object-cover transition-transform duration-300 hover:scale-105"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#D8DBBD] to-transparent opacity-70 hidden md:block"></div>
-        <h2 className="absolute bottom-4 left-4 text-[#131b38] text-2xl sm:text-3xl md:text-4xl font-bold hidden md:block">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#D8DBBD] to-transparent opacity-70"></div>
+        {/* Show name on both mobile and desktop */}
+        <h2 className="absolute bottom-4 left-4 text-[#131b38] text-2xl sm:text-3xl md:text-4xl font-bold">
           {item.name}
         </h2>
       </div>
@@ -74,14 +75,15 @@ export default function IdeaCard({ item }) {
           <div className="w-full md:w-1/2 flex flex-col h-full">
             {/* Static Header */}
             <div className="p-4 md:p-6">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">{item.name}</h2>
+              {/* Show room name on mobile only */}
+              <h2 className="block md:hidden text-2xl font-bold mb-2">{item.name}</h2>
+              <h2 className="hidden md:block text-2xl md:text-3xl font-bold mb-4">{item.name}</h2>
               <p className="text-gray-700 text-base md:text-lg">{item.description}</p>
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-6 space-y-6">
-              {/* ใส่ content ย่อย ๆ ของคุณที่นี่ เช่น theme_color, decor, lighting, etc. */}
-              {/* ตัวอย่าง */}
+              {/* Theme Colors */}
               {item.theme_color?.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-lg">Theme Colors:</h4>
@@ -92,7 +94,62 @@ export default function IdeaCard({ item }) {
                   </div>
                 </div>
               )}
-              {/* เพิ่ม sections อื่นตามโครงเดิม */}
+              {/* Decor */}
+              {item.decor?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-lg">Decor:</h4>
+                  <ul className="list-disc ml-5 mt-2 space-y-1">
+                    {item.decor.map((d, idx) => (
+                      <li key={idx}>{d}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Lighting */}
+              {item.lighting?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-lg">Lighting:</h4>
+                  <ul className="list-disc ml-5 mt-2 space-y-1">
+                    {item.lighting.map((l, idx) => (
+                      <li key={idx}>{l}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Furniture */}
+              {item.furniture?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-lg">Furniture:</h4>
+                  <ul className="list-disc ml-5 mt-2 space-y-1">
+                    {item.furniture.map((f, idx) => (
+                      <li key={idx}>{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Plants */}
+              {item.plants?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-lg">Plants:</h4>
+                  <ul className="list-disc ml-5 mt-2 space-y-1">
+                    {item.plants.map((p, idx) => (
+                      <li key={idx}>{p}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Tips */}
+              {item.tips?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-lg">Tips:</h4>
+                  <ul className="list-disc ml-5 mt-2 space-y-1">
+                    {item.tips.map((t, idx) => (
+                      <li key={idx}>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Any other fields */}
             </div>
           </div>
         </motion.div>
