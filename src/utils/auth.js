@@ -163,4 +163,19 @@ export const handleSignup = async (
   } finally {
     setIsRegistering(false);
   }
+};
+
+export const checkAuth = async (router, setIsAuthenticated, onSuccess) => {
+    const { isLoggedIn } = await checkLoginStatus();
+    
+    if (!isLoggedIn) {
+        router.push('/');
+        return false;
+    }
+    
+    setIsAuthenticated(true);
+    if (onSuccess) {
+        onSuccess();
+    }
+    return true;
 }; 
