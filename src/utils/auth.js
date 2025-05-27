@@ -68,4 +68,99 @@ export const handleProtectedRoute = async (route, router, isLoggedIn, setIsLogge
     } else {
         setShowLoginModal(true);
     }
+};
+
+export const handleLogin = async (username, password, setError, setIsLoggingIn, setShowOtpPopup) => {
+  if (!username || !password) {
+    setError("Please complete all inputs!");
+    return false;
+  }
+
+  try {
+    setIsLoggingIn(true);
+    const result = await fetchDataApi('POST', 'auth/login', { username, password });
+    
+    if (result.error) {
+      setError(result.error);
+      return false;
+    }
+    
+    setShowOtpPopup(true);
+    return true;
+    
+  } catch (error) {
+    console.error("Login error:", error);
+    setError("Error Please try again.");
+    return false;
+  } finally {
+    setIsLoggingIn(false);
+  }
+};
+
+export const handleSignup = async (
+  username,
+  email,
+  password,
+  confirmPassword,
+  firstname,
+  lastname,
+  setIsRegistering,
+  setError,
+  setSuccess,
+  onSuccessfulSignup,
+  onClose
+) => {
+  if (!username || !email || !password || !confirmPassword) {
+    setError("Please complete all required inputs!");
+    return false;
+  }
+
+  if (password !== confirmPassword) {
+    setError("Passwords do not match!");
+    return false;
+  }
+
+  try {
+    setIsRegistering(true);
+    
+    // First check if user already exists
+    const checkUserResult = await fetchDataApi('POST', 'auth/checkuser', { 
+      email: email.toLowerCase() 
+    });
+
+    if (checkUserResult.error) {
+      setError(checkUserResult.error);
+      return false;
+    }
+
+    if (checkUserResult.user) {
+      setError("User already exists");
+      return false;
+    }
+
+    // If user doesn't exist, proceed with registration
+    const registerResult = await fetchDataApi('POST', 'auth/register', { 
+      username, 
+      email: email.toLowerCase(), 
+      password,
+      firstname,
+      lastname
+    });
+
+    if (registerResult.error) {
+      setError(registerResult.error);
+      return false;
+    }
+
+    // Close the modal after successful registration
+    onClose();
+    return true;
+    
+  } catch (error) {
+    console.error("Error during registration: ", error);
+    setError("An error occurred. Please try again.");
+    return false;
+  } finally {
+    setIsRegistering(false);
+  }
 }; 

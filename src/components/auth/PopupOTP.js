@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useCountdownTimer } from "@/utils/calculations";
+import { sendOTP, verifyOTP } from '@/utils/otp';
 
 export default function PopupOTP({ 
   isOpen, 
@@ -11,104 +13,28 @@ export default function PopupOTP({
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
-
-  // OTP timeout countdown
-  useEffect(() => {
-    let timer;
-    if (isOpen && countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (countdown === 0) {
-      setCanResend(true);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown, isOpen]);
+  const { countdown, canResend, resetCountdown } = useCountdownTimer(60, isOpen);
+  const [success, setSuccess] = useState('');
 
   // Automatically send OTP when popup opens
   useEffect(() => {
-    if (isOpen && email) {
-      sendOTP();
+    if (isOpen) {
+      sendOTP(username, email, setLoading, setError, resetCountdown);
     }
-  }, [isOpen, email]);
+  }, [isOpen]);
 
-  const sendOTP = async () => {
-    setLoading(true);
-    setError('');
-    setCanResend(false);
+  const handleResendOTP = async () => {
+    if (!canResend) return;
     
-    try {
-      const response = await fetch('http://localhost:8000/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      
-      if (response.ok) {
-        setCountdown(60); // Reset countdown
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to send OTP. Please try again.');
-        setCanResend(true);
-      }
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      setError('Network error. Please try again.');
-      setCanResend(true);
-    } finally {
-      setLoading(false);
+    const success = await sendOTP(username, email, setLoading, setError, resetCountdown);
+    if (success) {
+      setSuccess('OTP sent successfully!');
     }
   };
 
-  const verifyOTP = async (e) => {
+  const handleVerifyOTP = async (e) => {
     e.preventDefault();
-    
-    if (!otp) {
-      setError('Please enter the OTP.');
-      return;
-    }
-    
-    setLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch('http://localhost:8000/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email,
-          otp,
-          password
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Store token if available
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          if (username) {
-            localStorage.setItem('username', username);
-          }
-        }
-        
-        // Call success callback
-        if (onVerificationSuccess) {
-          onVerificationSuccess(data.token);
-        }
-        
-        // Close popup
-        onClose();
-      } else {
-        setError(data.message || 'Invalid OTP. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    await verifyOTP(username, otp, password, setLoading, setError, onVerificationSuccess, onClose);
   };
 
   if (!isOpen) return null;
@@ -132,7 +58,7 @@ export default function PopupOTP({
         
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         
-        <form onSubmit={verifyOTP}>
+        <form onSubmit={handleVerifyOTP}>
           <div className="mb-6">
             <label htmlFor="otp" className="block mb-2 text-sm font-medium text-gray-700">
               Enter OTP Code
@@ -160,7 +86,7 @@ export default function PopupOTP({
         <div className="mt-4 text-center">
           {canResend ? (
             <button 
-              onClick={sendOTP} 
+              onClick={handleResendOTP} 
               className="text-[#2A3663] font-medium"
               disabled={loading}
               type="button"
