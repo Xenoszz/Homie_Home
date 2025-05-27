@@ -36,4 +36,4 @@ export const fetchSpaceGuide = async (setSpaceData) => {
   } catch (error) {
     console.error("Error fetching data:", error);
   }
-}; 
+};
