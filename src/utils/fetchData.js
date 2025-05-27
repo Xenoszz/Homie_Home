@@ -37,3 +37,29 @@ export const fetchSpaceGuide = async (setSpaceData) => {
     console.error("Error fetching data:", error);
   }
 };
+
+export const fetchRoomToDoActivity = async (roomId) => {
+    try {
+        const token = getStoredToken();
+        if (!token) {
+            throw new Error('No token found');
+        }
+        const headers = {'Authorization': `Bearer ${token}`};
+        // Fetch room details
+        const roomResponse = await fetchDataApi('GET', 'room/get', {}, headers);
+        const roomData = roomResponse.find(r => r._id === roomId);
+        if (!roomData) {
+            throw new Error('Room not found');
+        }
+        // Fetch tasks for this room
+        const tasksResponse = await fetchDataApi('GET', `task/get/${roomId}`, {}, headers);
+        
+        return {
+            room: roomData,
+            tasks: tasksResponse
+        };
+    } catch (error) {
+        console.error("Error fetching room data:", error);
+        throw error;
+    }
+};

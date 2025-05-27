@@ -1,10 +1,13 @@
 import Menubar from "@/components/Menubar";
-import { ArrowLeft, Edit, Trash2, Plus, Save, X, Loader } from 'lucide-react';
+import { ArrowLeft, Loader } from 'lucide-react';
 import { useRouter } from "next/router";
-import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
-import CanvasTaskWheel from "@/components/CanvasTaskWheel";
-import { fetchDataApi, sendDataApi } from "@/utils/api";
+import { useEffect, useState } from "react";
+import { checkAuth } from "@/utils/auth";
+import { fetchRoomToDoActivity } from "@/utils/fetchData";
+import { createTask, toggleTask, updateTaskName, deleteTask } from "@/utils/sendData";
+import TaskList from "@/components/TodoActivity/TaskList";
+import TaskInput from "@/components/TodoActivity/TaskInput";
+import TaskWheel from "@/components/TodoActivity/TaskWheel";
 
 export default function TodoActivity() {
     const router = useRouter();
@@ -16,73 +19,41 @@ export default function TodoActivity() {
     const [editTaskId, setEditTaskId] = useState(null);
     const [editTaskName, setEditTaskName] = useState("");
     const [highlightedTaskId, setHighlightedTaskId] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     
     useEffect(() => {
-        // Check if we're on the client-side and have the roomId
         if (typeof window !== 'undefined' && router.query.roomId) {
-            fetchRoomData();
+            checkAuth(router, setIsAuthenticated, handleFetchRoomData);
         }
     }, [router.query]);
 
-    const fetchRoomData = async () => {
+    const handleFetchRoomData = async () => {
+        const { roomId } = router.query;
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                router.push('/login');
-                return;
-            }
-            
-            const { roomId } = router.query;
-            
-            // Fetch room details
-            const roomResponse = await fetchDataApi('GET', 'room/get', {}, {
-                'Authorization': `Bearer ${token}`
-            });
-            
-            const roomData = roomResponse.find(r => r._id === roomId);
-            if (!roomData) {
-                console.error("Room not found");
-                router.push('/Todolist');
-                return;
-            }
-            
-            setRoom(roomData);
-            
-            // Fetch tasks for this room
-            const tasksResponse = await fetchDataApi('GET', `task/get/${roomId}`, {}, {
-                'Authorization': `Bearer ${token}`
-            });
-            
-            setTasks(tasksResponse);
-            setLoading(false);
+            setLoading(true);
+            const { room, tasks } = await fetchRoomToDoActivity(roomId);
+            setRoom(room);
+            setTasks(tasks);
         } catch (error) {
             console.error("Error fetching room data:", error);
+            router.push('/Todolist');
+        } finally {
             setLoading(false);
         }
     };
-    
+
     const handleGoBack = () => {
         router.push('/Todolist');
     };
     
     const handleAddTask = async () => {
-        if (!newTaskName.trim()) return;
-        
+        if (!newTaskName.trim() || !room) return;
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetchDataApi('POST', `task/create/${room._id}`, 
-                { name: newTaskName },
-                {
-                    'Authorization': `Bearer ${token}`
-                }
-            );
-            
+            const response = await createTask(room._id, newTaskName);
             setTasks([...tasks, response]);
             setNewTaskName("");
             setIsAddingTask(false);
-            
-            // Refresh room data to get updated progress
-            fetchRoomData();
+            handleFetchRoomData();
         } catch (error) {
             console.error("Error adding task:", error);
         }
@@ -90,20 +61,11 @@ export default function TodoActivity() {
 
     const handleToggleTask = async (taskId, isCompleted) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await sendDataApi('PUT', `task/update/${taskId}`, 
-                { completed: !isCompleted },
-                {
-                    'Authorization': `Bearer ${token}`
-                }
-            );
-            
+            const response = await toggleTask(taskId, isCompleted);
             setTasks(tasks.map(task => 
                 task._id === taskId ? response : task
             ));
-            
-            // Refresh room data to get updated progress
-            fetchRoomData();
+            handleFetchRoomData();
         } catch (error) {
             console.error("Error toggling task:", error);
         }
@@ -116,16 +78,8 @@ export default function TodoActivity() {
     
     const saveTaskEdit = async () => {
         if (!editTaskName.trim()) return;
-        
         try {
-            const token = localStorage.getItem('token');
-            const response = await sendDataApi('PUT', `task/update/${editTaskId}`, 
-                { name: editTaskName },
-                {
-                    'Authorization': `Bearer ${token}`
-                }
-            );
-            
+            const response = await updateTaskName(editTaskId, editTaskName);
             setTasks(tasks.map(task => 
                 task._id === editTaskId ? response : task
             ));
@@ -137,15 +91,9 @@ export default function TodoActivity() {
     
     const handleDeleteTask = async (taskId) => {
         try {
-            const token = localStorage.getItem('token');
-            await sendDataApi('DELETE', `task/delete/${taskId}`, {}, {
-                'Authorization': `Bearer ${token}`
-            });
-            
+            await deleteTask(taskId);
             setTasks(tasks.filter(task => task._id !== taskId));
-            
-            // Refresh room data to get updated progress
-            fetchRoomData();
+            handleFetchRoomData();
         } catch (error) {
             console.error("Error deleting task:", error);
         }
@@ -189,127 +137,33 @@ export default function TodoActivity() {
                             </span>
                         </div>
                         
-                        {/* Task List */}
-                        <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
-                            {tasks.map((task) => (
-                               <div
-                                key={task._id}
-                                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 hover:bg-gray-50 ${highlightedTaskId === task._id ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md' : ''}`}
-                              > 
-                                    {/* Checkbox */}
-                                    <div 
-                                        className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-3 border ${
-                                            task.completed 
-                                                ? 'bg-green-500 border-green-600 text-white' 
-                                                : 'border-gray-400 bg-white hover:bg-gray-100'
-                                        }`}
-                                        onClick={() => handleToggleTask(task._id, task.completed)}
-                                    >
-                                        {task.completed && '✓'}
-                                    </div>
-                                    
-                                    {/* Task Name */}
-                                    {editTaskId === task._id ? (
-                                        <div className="flex-1 flex items-center">
-                                            <input
-                                                type="text"
-                                                value={editTaskName}
-                                                onChange={(e) => setEditTaskName(e.target.value)}
-                                                className="flex-1 p-2 border rounded mr-2"
-                                                autoFocus
-                                            />
-                                            <button 
-                                                onClick={saveTaskEdit}
-                                                className="p-1 text-green-600 hover:text-green-800 mr-1"
-                                            >
-                                                <Save size={18} />
-                                            </button>
-                                            <button 
-                                                onClick={() => setEditTaskId(null)}
-                                                className="p-1 text-red-600 hover:text-red-800"
-                                            >
-                                                <X size={18} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <span className={`flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
-                                                {task.name}
-                                            </span>
-                                            
-                                            {/* Action Buttons */}
-                                            <div className="flex space-x-2">
-                                                <button 
-                                                    onClick={() => handleEditTask(task._id, task.name)}
-                                                    className="p-1 text-blue-600 hover:text-blue-800"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleDeleteTask(task._id)}
-                                                    className="p-1 text-red-600 hover:text-red-800"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            ))}
-                            
-                            {tasks.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    No tasks added yet
-                                </div>
-                            )}
-                        </div>
+                        <TaskList 
+                            tasks={tasks}
+                            editTaskId={editTaskId}
+                            editTaskName={editTaskName}
+                            setEditTaskName={setEditTaskName}
+                            highlightedTaskId={highlightedTaskId}
+                            handleToggleTask={handleToggleTask}
+                            handleEditTask={handleEditTask}
+                            handleDeleteTask={handleDeleteTask}
+                            saveTaskEdit={saveTaskEdit}
+                            setEditTaskId={setEditTaskId}
+                        />
                         
-                        {/* Add Task Input */}
-                        {isAddingTask ? (
-                            <div className="flex items-center mb-2">
-                                <input
-                                    type="text"
-                                    value={newTaskName}
-                                    onChange={(e) => setNewTaskName(e.target.value)}
-                                    placeholder="Enter task name"
-                                    className="flex-1 p-2 border rounded mr-2"
-                                    autoFocus
-                                />
-                                <button 
-                                    onClick={handleAddTask}
-                                    className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 mr-1"
-                                >
-                                    <Save size={18} />
-                                </button>
-                                <button 
-                                    onClick={() => setIsAddingTask(false)}
-                                    className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
-                                >
-                                    <X size={18} />
-                                </button>
-                            </div>
-                        ) : (
-                            <button 
-                                onClick={() => setIsAddingTask(true)}
-                                className="flex items-center justify-center w-full p-2 border-2 border-dashed border-gray-300 rounded-md hover:bg-gray-50"
-                            >
-                                <Plus size={20} className="mr-2" />
-                                <span>Add task</span>
-                            </button>
-                        )}
+                        <TaskInput 
+                            isAddingTask={isAddingTask}
+                            newTaskName={newTaskName}
+                            setNewTaskName={setNewTaskName}
+                            handleAddTask={handleAddTask}
+                            setIsAddingTask={setIsAddingTask}
+                        />
                     </div>
                     
                     {/* Task Wheel - Right Side */}
-                    <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold text-[#58482D] mb-6">Task Wheel</h2>
-                        <CanvasTaskWheel
-                            tasks={tasks.filter(task => !task.completed)}
-                            onSelectIndex={idx => {
-                                const incomplete = tasks.filter(task => !task.completed);
-                                setHighlightedTaskId(incomplete[idx]?._id || null);
-                            }}
-                        />
-                    </div>
+                    <TaskWheel 
+                        tasks={tasks}
+                        setHighlightedTaskId={setHighlightedTaskId}
+                    />
                 </div>
             </div>
         </div>
