@@ -63,3 +63,19 @@ export const fetchRoomToDoActivity = async (roomId) => {
         throw error;
     }
 };
+
+export const getOrganizeData = async () => {
+  try {
+    const data = await fetchDataApi('GET', 'organize/get');
+    return { 
+      props: { items: data }, 
+      revalidate: 10 
+    };
+  } catch (error) {
+    console.error('Error fetching organize data:', error);
+    return { 
+      props: { items: [] }, 
+      revalidate: 10 
+    };
+  }
+};
