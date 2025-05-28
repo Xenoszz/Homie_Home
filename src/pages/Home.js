@@ -452,7 +452,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative mt-5 ml-4 mr-4 rounded-[1rem] h-[30vh]">
+        {/* Smart Organizing Hack - Desktop */}
+        <div className="relative mt-16 ml-4 mr-4 rounded-[1rem] h-[30vh]">  {/* เปลี่ยนจาก mt-5 เป็น mt-16 */}
           <Image src={OrganizePage} alt="Card" className="w-full h-full object-cover rounded-[1rem] object-[60%_70%]" />
 
           <div className="absolute inset-0 bg-gradient-to-l from-[#B59F78] to-[#ffffff00] bg-opacity-70 rounded-[1rem] flex flex-col items-end">

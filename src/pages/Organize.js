@@ -153,17 +153,18 @@ export default function Organize({ items }) {
 
           <div className={`
             ${isMobile 
-              ? 'grid grid-cols-2 gap-4 px-4' 
-              : 'flex flex-row gap-4 md:gap-4 w-[90%] justify-center items-center'
+              ? 'grid grid-cols-2 gap-2 md:gap-4 px-2 md:px-4 w-full' 
+              : 'flex flex-row gap-2 md:gap-4 w-[90%] justify-center items-center'
             }
           `}>
             {selectedItems.slice(startIndex, endIndex).map((item) => (
-              <CardComponent
-                key={item.id}
-                item={item}
-                isSelected={selectedItemId === item.id}
-                onClick={() => setSelectedItemId(selectedItemId === item.id ? null : item.id)}
-              />
+              <div className="w-full md:w-[80%] transition-all duration-300" key={item.id}>
+                <CardComponent
+                  item={item}
+                  isSelected={selectedItemId === item.id}
+                  onClick={() => setSelectedItemId(selectedItemId === item.id ? null : item.id)}
+                />
+              </div>
             ))}
           </div>
 

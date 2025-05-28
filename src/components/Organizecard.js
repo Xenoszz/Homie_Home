@@ -131,3 +131,32 @@ export default function OrganizeCard({ item, isSelected, onClick }) {
     </motion.div>
   );
 }
+
+export function CardComponent({ item, isSelected, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      className={`
+        relative
+        w-full
+        h-[160px] sm:h-[180px] md:h-[200px] lg:h-[250px]
+        rounded-lg md:rounded-xl
+        overflow-hidden
+        transition-all duration-300
+        cursor-pointer
+        ${isSelected ? 'ring-4 ring-[#4F4534]' : ''}
+      `}
+    >
+      <Image
+        src={item.image}
+        alt={item.name}
+        layout="fill"
+        objectFit="cover"
+        className="transition-transform duration-300 hover:scale-105"
+      />
+      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 md:p-3">
+        <h3 className="text-sm md:text-base lg:text-lg font-semibold">{item.name}</h3>
+      </div>
+    </div>
+  );
+}
