@@ -1,4 +1,4 @@
-import CanvasTaskWheel from "@/components/CanvasTaskWheel";
+import CanvasTaskWheel from "@/components/TodoActivity/CanvasTaskWheel";
 
 export default function TaskWheel({ tasks, setHighlightedTaskId }) {
     return (
