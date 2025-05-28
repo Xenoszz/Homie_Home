@@ -3,45 +3,36 @@ const API_BASE_URL = 'http://localhost:8000/api';
 // Generic function to fetch data from API
 export const fetchDataApi = async (method, endpoint, data = {}, headers = {}) => {
     try {
-        // Log request details
         console.log('Making API request to:', `${API_BASE_URL}/${endpoint}`);
         console.log('Original headers:', headers);
-        
-
         const requestHeaders = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             ...headers
         };
-
         const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
             method,
             headers: requestHeaders,
             body: method !== 'GET' ? JSON.stringify(data) : undefined,
             credentials: 'include'
         });
-
         const responseData = await response.json();
-
         if (!response.ok) {
             return { error: responseData.message };
         }
         return responseData;
-
     } catch (error) {
         console.error('API Error:', error);
-        return { error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง' };
+        return { error: 'Connection error occurred. Please try again.' };
     }
 };
 
 // Function for PUT and DELETE operations
 export const sendDataApi = async (method, endpoint, data = {}, headers = {}) => {
     const isFormData = data instanceof FormData;
-
     try {
         console.log('Making API request to:', `${API_BASE_URL}/${endpoint}`);
         console.log('Request headers:', headers);
-
         const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
             method,
             headers: isFormData ? undefined : {
@@ -51,7 +42,6 @@ export const sendDataApi = async (method, endpoint, data = {}, headers = {}) => 
             },
             body: method !== 'GET' ? (isFormData ? data : JSON.stringify(data)) : undefined,
         });
-
         const text = await response.text();
         try {
             const data = JSON.parse(text);
@@ -77,18 +67,15 @@ export const sendOTPApi = async (username, email) => {
             },
             body: JSON.stringify({ username, email })
         });
-
         const text = await response.text();
-        
         // ถ้า response เป็นข้อความธรรมดา
         if (!text.startsWith('{') && !text.startsWith('[')) {
             return { message: text };
         }
-
         try {
             const data = JSON.parse(text);
             if (!response.ok) {
-                return { error: data.message || 'เกิดข้อผิดพลาดในการส่ง OTP' };
+                return { error: data.message || 'A verification error occurred. OTP' };
             }
             return data;
         } catch (err) {
@@ -97,7 +84,7 @@ export const sendOTPApi = async (username, email) => {
         }
     } catch (error) {
         console.error('Error sending OTP:', error);
-        return { error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง' };
+        return { error: 'Connection error occurred. Please try again.' };
     }
 };
 
@@ -113,17 +100,15 @@ export const verifyOTPApi = async (username, otp, password) => {
             },
             body: JSON.stringify({ username, otp, password })
         });
-
         const data = await response.json();
-        
         if (!response.ok) {
-            return { error: data.message || 'เกิดข้อผิดพลาดในการยืนยัน OTP' };
+            return { error: data.message || 'A verification error occurred. OTP' };
         }
 
         return data;
     } catch (error) {
         console.error('Error verifying OTP:', error);
-        return { error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง' };
+        return { error: 'Connection error occurred. Please try again.' };
     }
 };
 

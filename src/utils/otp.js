@@ -3,20 +3,15 @@ import { setLoginData } from './auth';
 
 export const handleOtpSuccess = async (token, username, setSuccess, setError, onSuccessfulLogin, onClose) => {
   try {
-    // Store token and username
     setLoginData(username, token);
-    
     setSuccess("Login successful!");
     setError("");
-    
-    // Notify parent component about successful login
+  
     if (onSuccessfulLogin) {
       onSuccessfulLogin(username, token);
     }
-    
-    // Close the modal after successful login
+
     onClose();
-    
   } catch (error) {
     console.error("Error during OTP verification:", error);
     setError("Error during OTP verification");
@@ -63,17 +58,14 @@ export const verifyOTP = async (username, otp, password, setLoading, setError, o
       return false;
     }
     
-    // Store token if available
     if (result.token) {
       setLoginData(username, result.token);
     }
     
-    // Call success callback
     if (onVerificationSuccess) {
       onVerificationSuccess(result.token);
     }
     
-    // Close popup
     onClose();
     return true;
   } catch (error) {

@@ -1,6 +1,8 @@
 // Group space data into groups of 3
 import { useState,useEffect } from 'react';
 
+
+//Home.js
 export const groupSpaceData = (spaceData) => {
   return spaceData.reduce((acc, item, index) => {
     if (index % 3 === 0) acc.push([]);
@@ -9,14 +11,15 @@ export const groupSpaceData = (spaceData) => {
   }, []);
 };
 
-// Calculate overall progress from rooms
+
+//Home.js
 export const calculateOverallProgress = (rooms) => {
   return rooms.length > 0
     ? Math.round(rooms.reduce((sum, r) => sum + (r.progress || 0), 0) / rooms.length)
     : 0;
 };
 
-// Custom hook for countdown timer
+// PopupOTP.js
 export const useCountdownTimer = (initialTime, isOpen) => {
   const [countdown, setCountdown] = useState(initialTime);
   const [canResend, setCanResend] = useState(false);
@@ -43,7 +46,7 @@ export const useCountdownTimer = (initialTime, isOpen) => {
   };
 };
 
-// Calculate pagination indices
+// Organize.js
 export const calculatePagination = (currentPage, itemsPerPage, totalItems) => {
   const start = currentPage * itemsPerPage;
   const end = start + itemsPerPage;
