@@ -1,20 +1,8 @@
 import { sendDataApi } from './api';
-import { getStoredToken } from './auth';
+import { getAuthHeaders, handleApiError } from './auth';
 
-// Helper functions
-const getAuthHeaders = () => {
-    const token = getStoredToken();
-    if (!token) {
-        throw new Error('No token found');
-    }
-    return { 'Authorization': `Bearer ${token}` };
-};
 
-const handleApiError = (error, operation) => {
-    console.error(`Error ${operation}:`, error);
-    throw error;
-};
-
+// Todolist.js
 export const createRoom = async (roomTemplate, setRooms, rooms, setIsOpen) => {
     try {
         const headers = getAuthHeaders();
@@ -34,6 +22,7 @@ export const createRoom = async (roomTemplate, setRooms, rooms, setIsOpen) => {
     }
 };
 
+// Todolist.js
 export const removeRoom = async (roomId, setRooms, rooms) => {
     try {
         const headers = getAuthHeaders();
@@ -49,6 +38,7 @@ export const removeRoom = async (roomId, setRooms, rooms) => {
     }
 };
 
+// Todolist.js
 export const updateRoomName = async (roomId, newName, setRooms, rooms, setEditMode) => {
     if (!newName.trim()) return;
 
@@ -72,6 +62,7 @@ export const updateRoomName = async (roomId, newName, setRooms, rooms, setEditMo
     }
 };
 
+// TodoActivity.js
 export const createTask = async (roomId, taskName) => {
     try {
         const headers = getAuthHeaders();
@@ -85,6 +76,7 @@ export const createTask = async (roomId, taskName) => {
     }
 };
 
+// TodoActivity.js
 export const toggleTask = async (taskId, isCompleted) => {
     try {
         const headers = getAuthHeaders();
@@ -98,6 +90,7 @@ export const toggleTask = async (taskId, isCompleted) => {
     }
 };
 
+// TodoActivity.js
 export const updateTaskName = async (taskId, newName) => {
     try {
         const headers = getAuthHeaders();
@@ -111,6 +104,7 @@ export const updateTaskName = async (taskId, newName) => {
     }
 };
 
+// TodoActivity.js
 export const deleteTask = async (taskId) => {
     try {
         const headers = getAuthHeaders();

@@ -1,51 +1,63 @@
 import { fetchDataApi } from './api';
 
-export const checkLoginStatus = async () => {
-    const storedToken = localStorage.getItem('token');
-    const storedUsername = localStorage.getItem('username');
-    
-    if (!storedToken || !storedUsername) {
-        return {
-            isLoggedIn: false,
-            username: ''
-        };
-    }
-    try {
-        const headers = {'Authorization': `Bearer ${storedToken}`};
-        const data = await fetchDataApi('POST', 'auth/check-token', { token: storedToken });
-
-        if (data.message === 'Token is valid') {
-            return {
-                isLoggedIn: true,
-                username: data.user?.username || storedUsername
-            };
-        }
-    } catch (error) {
-        console.error('Error checking token:', error);
-    }
-
-    return {
-        isLoggedIn: false,
-        username: ''
-    };
-};
-
 export const setLoginData = (username, token) => {
-    localStorage.setItem('username', username);
-    localStorage.setItem('token', token);
+  localStorage.setItem('username', username);
+  localStorage.setItem('token', token);
 };
 
 export const clearLoginData = () => {
-    localStorage.removeItem('username');
-    localStorage.removeItem('token');
+  localStorage.removeItem('username');
+  localStorage.removeItem('token');
 };
 
 export const getStoredToken = () => {
-    return localStorage.getItem('token');
+  return localStorage.getItem('token');
 };
 
 export const getStoredUsername = () => {
-    return localStorage.getItem('username');
+  return localStorage.getItem('username');
+};
+
+export const getAuthHeaders = () => {
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+  return { 'Authorization': `Bearer ${token}` };
+};
+
+export const handleApiError = (error, operation) => {
+  console.error(`Error ${operation}:`, error);
+  throw error;
+};
+
+export const checkLoginStatus = async () => {
+  const storedToken = getStoredToken();
+  const storedUsername = getStoredUsername();
+  
+  if (!storedToken || !storedUsername) {
+    return {
+      isLoggedIn: false,
+      username: ''
+    };
+  }
+  try {
+    const data = await fetchDataApi('POST', 'auth/check-token', { token: storedToken });
+
+    if (data.message === 'Token is valid') {
+      return {
+        isLoggedIn: true,
+        username: data.user?.username || storedUsername
+      };
+    }
+  } catch (error) {
+    handleApiError(error, 'checking login status');
+  }
+
+  return {
+    isLoggedIn: false,
+    username: ''
+  };
 };
 
 export const handleProtectedRoute = async (route, router, isLoggedIn, setIsLoggedIn, setShowLoginModal) => {
@@ -178,4 +190,6 @@ export const checkAuth = async (router, setIsAuthenticated, onSuccess) => {
         onSuccess();
     }
     return true;
-}; 
+};
+
+
