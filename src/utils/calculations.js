@@ -43,3 +43,13 @@ export const useCountdownTimer = (initialTime, isOpen) => {
   };
 };
 
+// Calculate pagination indices
+export const calculatePagination = (currentPage, itemsPerPage, totalItems) => {
+  const start = currentPage * itemsPerPage;
+  const end = start + itemsPerPage;
+  return {
+    startIndex: start,
+    endIndex: Math.min(end, totalItems)
+  };
+};
+
