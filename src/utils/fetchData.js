@@ -79,3 +79,17 @@ export const getOrganizeData = async () => {
     };
   }
 };
+
+/**
+ * ดึงข้อมูลไอเดียจาก API
+ * @returns {Promise<Array>} ข้อมูลไอเดียทั้งหมด
+ */
+export const getIdeasData = async () => {
+  try {
+    const data = await fetchDataApi('GET', 'idea/get');
+    return data;
+  } catch (error) {
+    console.error("Error fetching ideas data:", error);
+    return [];
+  }
+};
