@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { handleLogin } from "@/utils/auth";
-import { handleOtpSuccess } from "@/utils/otp";
-import PopupOTP from './PopupOTP';
+import { handleOtpSuccess } from "@/utils/otp.jsx";
+import PopupOTP from './PopupOTP.jsx';
 
 export default function Loginpopup({ 
   isOpen, 

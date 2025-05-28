@@ -1,14 +1,14 @@
 import { useRef, useState, useEffect } from "react";
-import Menubar from "@/components/Menubar";
+import Menubar from "@/components/Menubar.jsx";
 import { useRouter } from "next/router";
-import LoginModal from "@/components/auth/Loginpopup";
-import SignupModal from "@/components/auth/Signuppopup";
-import { checkLoginStatus, setLoginData, clearLoginData, getStoredToken, handleProtectedRoute } from "@/utils/auth";
-import { groupSpaceData, calculateOverallProgress } from "@/utils/calculations";
-import { fetchRooms, fetchSpaceGuide } from "@/utils/fetchData";
-import { Dashboard } from "@/components/home/Dashboard";
-import { SpaceGuideSection } from "@/components/home/SpaceGuideSection";
-import { SmartOrganizingHack } from "@/components/home/SmartOrganizingHack";
+import LoginModal from "@/components/auth/Loginpopup.jsx";
+import SignupModal from "@/components/auth/Signuppopup.jsx";
+import { checkLoginStatus, setLoginData, clearLoginData, getStoredToken, handleProtectedRoute } from "@/utils/auth.jsx";
+import { groupSpaceData, calculateOverallProgress } from "@/utils/calculations.jsx";
+import { fetchRooms, fetchSpaceGuide } from "@/utils/fetchData.jsx";
+import { Dashboard } from "@/components/home/Dashboard.jsx";
+import { SpaceGuideSection } from "@/components/home/SpaceGuideSection.jsx";
+import { SmartOrganizingHack } from "@/components/home/SmartOrganizingHack.jsx";
 
 export default function Home() {
   const router = useRouter();

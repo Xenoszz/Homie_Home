@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import Popup from "./PopupCard";
+import Popup from "./PopupCard.jsx";
 
 export default function Spaceguide({ imageSrc, title, description, extraInfo }) {
   const [isOpen, setIsOpen] = useState(false);

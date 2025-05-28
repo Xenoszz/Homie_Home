@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { handleSignup } from '@/utils/auth';
+import { handleSignup } from '@/utils/auth.jsx';
 
 export default function Signuppopup({ 
   isOpen, 

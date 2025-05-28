@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import Spaceguide from './Spaceguide';
+import Spaceguide from './Spaceguide.jsx';
 
 export function SpaceGuideSection({ spaceData, isMobile = false }) {
   const [page, setPage] = useState(0);

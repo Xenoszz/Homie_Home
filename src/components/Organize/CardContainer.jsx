@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import  CardComponent  from "@/components/Organize/Organizecard";
+import  CardComponent  from "@/components/Organize/Organizecard.jsx";
 
 export default function CardContainer({
   selectedItems,

@@ -1,4 +1,4 @@
-import { ProgressCircle } from './ProgressCircle';
+import { ProgressCircle } from './ProgressCircle.jsx';
 
 export function Dashboard({ rooms, isLoggedIn, loadingRooms, overallProgress, isMobile = false }) {
   if (isMobile) {

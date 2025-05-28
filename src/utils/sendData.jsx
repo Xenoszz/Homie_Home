@@ -1,5 +1,5 @@
-import { sendDataApi } from './api';
-import { getAuthHeaders, handleApiError } from './auth';
+import { sendDataApi } from './api.jsx';
+import { getAuthHeaders, handleApiError } from './auth.jsx';
 
 
 // Todolist.js

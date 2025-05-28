@@ -1,15 +1,15 @@
-import Menubar from "@/components/Menubar";
+import Menubar from "@/components/Menubar.jsx";
 import { SquarePlus, CircleX, Edit, Loader } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { checkAuth } from "@/utils/auth";
-import { fetchRooms } from "@/utils/fetchData";
-import { createRoom, removeRoom, updateRoomName } from "@/utils/sendData";
-import { roomTemplates } from "@/utils/roomTemplates";
-import RoomCard from "@/components/Todolist/RoomCard";
-import RoomSelectionPopup from "@/components/Todolist/RoomSelectionPopup";
-import DesktopRoomCard from "@/components/Todolist/DesktopRoomCard";
-import DesktopRoomSelectionPopup from "@/components/Todolist/DesktopRoomSelectionPopup";
+import { checkAuth } from "@/utils/auth.jsx";
+import { fetchRooms } from "@/utils/fetchData.jsx";
+import { createRoom, removeRoom, updateRoomName } from "@/utils/sendData.jsx";
+import { roomTemplates } from "@/utils/roomTemplates.jsx";
+import RoomCard from "@/components/Todolist/RoomCard.jsx";
+import RoomSelectionPopup from "@/components/Todolist/RoomSelectionPopup.jsx";
+import DesktopRoomCard from "@/components/Todolist/DesktopRoomCard.jsx";
+import DesktopRoomSelectionPopup from "@/components/Todolist/DesktopRoomSelectionPopup.jsx";
 
 export default function Todolist() {
     const [isOpen, setIsOpen] = useState(false);

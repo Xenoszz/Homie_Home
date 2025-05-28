@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import Menubar from "@/components/Menubar";
-import { getOrganizeData } from "@/utils/fetchData";
-import { calculatePagination } from "@/utils/calculations";
-import SearchBar from "@/components/Organize/SearchBar";
-import SearchResults from "@/components/Organize/SearchResults";
-import CardContainer from "@/components/Organize/CardContainer";
+import { getOrganizeData } from "@/utils/fetchData.jsx";
+import { calculatePagination } from "@/utils/calculations.jsx";
+import SearchBar from "@/components/Organize/SearchBar.jsx";
+import SearchResults from "@/components/Organize/SearchResults.jsx";
+import CardContainer from "@/components/Organize/CardContainer.jsx";
 
 export default function Organize() {
   // State สำหรับการค้นหาและแสดงผล

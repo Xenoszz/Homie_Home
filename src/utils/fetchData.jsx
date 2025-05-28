@@ -1,5 +1,5 @@
-import { fetchDataApi } from './api';
-import { getAuthHeaders, handleApiError } from './auth';
+import { fetchDataApi } from './api.jsx';
+import { getAuthHeaders, handleApiError } from './auth.jsx';
 
 // Home.js && Todolist.js
 export const fetchRooms = async (setRooms, setLoadingRooms) => {

@@ -1,13 +1,13 @@
-import Menubar from "@/components/Menubar";
+import Menubar from "@/components/Menubar.jsx";
 import { ArrowLeft, Loader } from 'lucide-react';
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { checkAuth } from "@/utils/auth";
-import { fetchRoomToDoActivity } from "@/utils/fetchData";
-import { createTask, toggleTask, updateTaskName, deleteTask } from "@/utils/sendData";
-import TaskList from "@/components/TodoActivity/TaskList";
-import TaskInput from "@/components/TodoActivity/TaskInput";
-import TaskWheel from "@/components/TodoActivity/TaskWheel";
+import { checkAuth } from "@/utils/auth.jsx";
+import { fetchRoomToDoActivity } from "@/utils/fetchData.jsx";
+import { createTask, toggleTask, updateTaskName, deleteTask } from "@/utils/sendData.jsx";
+import TaskList from "@/components/TodoActivity/TaskList.jsx";
+import TaskInput from "@/components/TodoActivity/TaskInput.jsx";
+import TaskWheel from "@/components/TodoActivity/TaskWheel.jsx";
 
 export default function TodoActivity() {
     const router = useRouter();
