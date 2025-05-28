@@ -3,7 +3,7 @@ import Image from "next/image";
 import Menubar from "@/components/Menubar";
 import SearchIcon from "/public/Search_alt_fill.png";
 import IdeaCard from "@/components/ideas/Ideacard";
-import { getIdeasData } from "@/utils/fetchData";
+import { getIdeasData } from "@/utils/fetchData.jsx";
 
 export default function Ideas() {
   const [searchTerm, setSearchTerm] = useState("");

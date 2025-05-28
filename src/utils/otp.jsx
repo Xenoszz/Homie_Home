@@ -1,5 +1,5 @@
-import { fetchDataApi } from './api';
-import { setLoginData } from './auth';
+import { fetchDataApi } from './api.jsx';
+import { setLoginData } from './auth.jsx';
 
 export const handleOtpSuccess = async (token, username, setSuccess, setError, onSuccessfulLogin, onClose) => {
   try {

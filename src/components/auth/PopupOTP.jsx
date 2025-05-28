@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useCountdownTimer } from "@/utils/calculations";
-import { sendOTP, verifyOTP } from '@/utils/otp';
+import { useCountdownTimer } from "@/utils/calculations.jsx";
+import { sendOTP, verifyOTP } from '@/utils/otp.jsx';
 
 export default function PopupOTP({ 
   isOpen, 

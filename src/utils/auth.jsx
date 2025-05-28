@@ -1,4 +1,4 @@
-import { fetchDataApi } from './api';
+import { fetchDataApi } from './api.jsx';
 
 export const setLoginData = (username, token) => {
   localStorage.setItem('username', username);
