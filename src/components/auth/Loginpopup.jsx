@@ -16,11 +16,13 @@ export default function Loginpopup({
   const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  // auth.jsx   Handle login form submission
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     await handleLogin(username, password, setError, setIsLoggingIn, setShowOtpPopup);
   };
 
+  // auth.jsx   Handle OTP verification success
   const handleOtpSuccessWrapper = async (token) => {
     await handleOtpSuccess(token, username, setSuccess, setError, onSuccessfulLogin, onClose);
   };
