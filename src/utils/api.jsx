@@ -111,4 +111,3 @@ export const verifyOTPApi = async (username, otp, password) => {
         return { error: 'Connection error occurred. Please try again.' };
     }
 };
-

@@ -20,17 +20,17 @@ export default function Todolist() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
 
-    // Check authentication and fetch rooms
+    // Auth.jsx Check authentication and fetch rooms
     useEffect(() => {
         checkAuth(router, setIsAuthenticated, () => fetchRooms(setRooms, setLoading));
     }, [router]);
 
-    // Handle room selection and creation
+    // roomService.jsx Handle room selection and creation
     const handleRoomSelection = (roomTemplate) => {
         createRoom(roomTemplate, setRooms, rooms, setIsOpen);
     };
 
-    // Remove room
+    // roomService.jsx Remove room
     const handleRemoveRoom = (roomId) => {
         removeRoom(roomId, setRooms, rooms);
     };
@@ -50,7 +50,7 @@ export default function Todolist() {
         setEditName(currentName);
     };
 
-    // Save edited room name
+    // roomService.jsx Save edited room name
     const handleSaveRoomName = (roomId) => {
         updateRoomName(roomId, editName, setRooms, rooms, setEditMode);
     };

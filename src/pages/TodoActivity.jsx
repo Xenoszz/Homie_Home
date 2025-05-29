@@ -21,12 +21,14 @@ export default function TodoActivity() {
     const [highlightedTaskId, setHighlightedTaskId] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     
+    // auth.jsx   Check authentication and fetch room data
     useEffect(() => {
         if (typeof window !== 'undefined' && router.query.roomId) {
             checkAuth(router, setIsAuthenticated, handleFetchRoomData);
         }
     }, [router.query]);
 
+    // fetchData.jsx   Fetch room and tasks data
     const handleFetchRoomData = async () => {
         const { roomId } = router.query;
         try {
@@ -46,6 +48,7 @@ export default function TodoActivity() {
         router.push('/Todolist');
     };
     
+    // sendData.jsx  Create new task
     const handleAddTask = async () => {
         if (!newTaskName.trim() || !room) return;
         try {
@@ -59,6 +62,7 @@ export default function TodoActivity() {
         }
     };
 
+    // sendData.jsx  Toggle task completion status
     const handleToggleTask = async (taskId, isCompleted) => {
         try {
             const response = await toggleTask(taskId, isCompleted);
@@ -76,6 +80,7 @@ export default function TodoActivity() {
         setEditTaskName(currentName);
     };
     
+    // sendData.jsx   Update task name
     const saveTaskEdit = async () => {
         if (!editTaskName.trim()) return;
         try {
@@ -89,6 +94,7 @@ export default function TodoActivity() {
         }
     };
     
+    // sendData.jsx   Delete task
     const handleDeleteTask = async (taskId) => {
         try {
             await deleteTask(taskId);

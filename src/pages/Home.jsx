@@ -12,9 +12,6 @@ import { SmartOrganizingHack } from "@/components/home/SmartOrganizingHack.jsx";
 
 export default function Home() {
   const router = useRouter();
-  const scrollRef = useRef(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(true);
   const [spaceData, setSpaceData] = useState([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
@@ -23,6 +20,7 @@ export default function Home() {
   const [rooms, setRooms] = useState([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
 
+  // auth.jsx   Check login status
   useEffect(() => {
     const checkStatus = async () => {
       const { isLoggedIn: status, username: name } = await checkLoginStatus();
@@ -32,50 +30,23 @@ export default function Home() {
     checkStatus();
   }, []); 
 
-  // Fetch space guide data
+  // fetchData.jsx   Fetch space guide data
   useEffect(() => {
     fetchSpaceGuide(setSpaceData);
   }, []); 
 
-  // Fetch rooms data
+  // fetchData.jsx   Fetch rooms data
   useEffect(() => {
     fetchRooms(setRooms, setLoadingRooms);
   }, [isLoggedIn]); 
 
-  // Handle scroll events
-  useEffect(() => {
-    const checkScroll = () => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        setShowLeftArrow(scrollLeft > 0);
-        setShowRightArrow(scrollLeft + clientWidth < scrollWidth);
-      }
-    };
-    if (scrollRef.current) {
-      scrollRef.current.addEventListener("scroll", checkScroll);
-      checkScroll();
-    }
-    return () => {
-      if (scrollRef.current) {
-        scrollRef.current.removeEventListener("scroll", checkScroll);
-      }
-    };
-  }, [spaceData]); 
 
-  const handleScroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.children[0].clientWidth;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
+  // auth.jsx   Handle protected route navigation
   const handleProtectedRouteClick = (route) => {
     handleProtectedRoute(route, router, isLoggedIn, setIsLoggedIn, setShowLoginModal);
   };
 
+  // auth.jsx   Handle successful login
   const handleSuccessfulLogin = (username, token) => {
     setLoginData(username, token);
     setIsLoggedIn(true);
@@ -88,6 +59,7 @@ export default function Home() {
     }
   };
 
+  // auth.jsx   Handle successful signup
   const handleSuccessfulSignup = (username, token) => {
     setLoginData(username, token);
     setIsLoggedIn(true);

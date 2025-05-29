@@ -21,7 +21,7 @@ export const getStoredUsername = () => {
 export const getAuthHeaders = () => {
   const token = getStoredToken();
   if (!token) {
-    throw new Error('No token found');
+    return Error('No token found');
   }
   return { 'Authorization': `Bearer ${token}` };
 };
@@ -50,7 +50,16 @@ export const checkLoginStatus = async () => {
         username: data.user?.username || storedUsername
       };
     }
+    
+    // Clear login data when token is not valid
+    clearLoginData();
+    return {
+      isLoggedIn: false,
+      username: ''
+    };
   } catch (error) {
+    // Clear login data when token is invalid or expired
+    clearLoginData();
     handleApiError(error, 'checking login status');
   }
 

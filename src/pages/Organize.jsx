@@ -7,7 +7,6 @@ import SearchResults from "@/components/Organize/SearchResults.jsx";
 import CardContainer from "@/components/Organize/CardContainer.jsx";
 
 export default function Organize() {
-  // State สำหรับการค้นหาและแสดงผล
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]); // ผลการค้นหา
   const [selectedItems, setSelectedItems] = useState([]); // รายการที่ผู้ใช้เลือก
@@ -16,10 +15,10 @@ export default function Organize() {
   const [isMobile, setIsMobile] = useState(false);
   const [items, setItems] = useState([]); // เพิ่ม state สำหรับเก็บข้อมูล items
   const scrollRef = useRef(null);
-  const itemsPerPage = 5; // ✅ แสดง 5 การ์ดต่อหน้า
+  const itemsPerPage = 5; // แสดง 5 การ์ดต่อหน้า
   const { startIndex, endIndex } = calculatePagination(currentPage, itemsPerPage, selectedItems.length);
 
-  // Fetch Data
+  // fetchData.jsx   Fetch organize data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,7 +31,8 @@ export default function Organize() {
     };
     fetchData();
   }, []);
-
+  
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -42,7 +42,7 @@ export default function Organize() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ฟังก์ชันค้นหา - แสดงเฉพาะผลการค้นหา
+
   const handleSearch = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
@@ -56,14 +56,13 @@ export default function Organize() {
     }
   };
 
-  // ฟังก์ชันเพิ่มไอเทมที่เลือก
+
   const addItem = (item) => {
     if (!selectedItems.some((i) => i.id === item.id)) {
       setSelectedItems([...selectedItems, item]);
     }
   };
 
-  // ฟังก์ชัน Clear
   const handleClear = () => {
     setSelectedItems([]); 
     setSelectedItemId(null);
@@ -71,14 +70,14 @@ export default function Organize() {
     setSearchResults([]); 
   };
 
-  // แก้ไขฟังก์ชัน nextPage
+
   const nextPage = () => {
     if (endIndex < selectedItems.length) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  // แก้ไขฟังก์ชัน prevPage
+
   const prevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);

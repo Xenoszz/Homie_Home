@@ -10,7 +10,7 @@ export default function Ideas() {
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // ดึงข้อมูลจาก API
+  // fetchData.jsx   Fetch IdeasData
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -23,7 +23,7 @@ export default function Ideas() {
     fetchData();
   }, []);
 
-  // ค้นหาข้อมูล
+  // Search data
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
