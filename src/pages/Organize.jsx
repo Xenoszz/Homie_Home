@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Menubar from "@/components/Menubar";
-import { getOrganizeData } from "@/utils/fetchData.jsx";
+import { getOrganizeData, searchOrganizeItems, addOrganizeItem } from "@/utils/fetchData.jsx";
 import { calculatePagination } from "@/utils/calculations.jsx";
 import SearchBar from "@/components/Organize/SearchBar.jsx";
 import SearchResults from "@/components/Organize/SearchResults.jsx";
@@ -43,23 +43,33 @@ export default function Organize() {
   }, []);
 
 
-  const handleSearch = (e) => {
+// FetchData.jsx  searchOrganizeItems
+  const handleSearch = async (e) => {
     const term = e.target.value;
     setSearchTerm(term);
     if (term.trim() === "") {
       setSearchResults([]);
     } else {
-      const filtered = items.filter((item) =>
-        item.name.toLowerCase().includes(term.toLowerCase())
-      );
-      setSearchResults(filtered);
+      try {
+        const results = await searchOrganizeItems(term);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Error searching items:', error);
+        setSearchResults([]);
+      }
     }
   };
 
-
-  const addItem = (item) => {
+// FetchData.jsx addOrganizeItem
+  const addItem = async (item) => {
     if (!selectedItems.some((i) => i.id === item.id)) {
-      setSelectedItems([...selectedItems, item]);
+      try {
+        const bestMatch = await addOrganizeItem(item);
+        setSelectedItems([...selectedItems, bestMatch]);
+      } catch (error) {
+        console.error('Error adding item:', error);
+        setSelectedItems([...selectedItems, item]);
+      }
     }
   };
 
