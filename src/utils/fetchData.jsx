@@ -102,10 +102,24 @@ export const addOrganizeItem = async (item) => {
 // ideas.js
 export const getIdeasData = async () => {
   try {
-    const data = await fetchDataApi('GET', 'idea/get');
-    return data;
+    const response = await fetchDataApi('GET', 'idea/get');
+    return response;
   } catch (error) {
-    handleApiError(error, 'fetching ideas data');
+    handleApiError(error);
     return [];
+  }
+};
+
+// ideas.js
+export const getItemDetails = async (item) => {
+  try {
+    const itemSearch = await fetchDataApi('GET', `idea/search?searchTerm=${encodeURIComponent(item.name)}`);
+    if (itemSearch && itemSearch.length > 0) {
+      return itemSearch[0]; 
+    }
+    return item; 
+  } catch (error) {
+    handleApiError(error);
+    return item; 
   }
 };
