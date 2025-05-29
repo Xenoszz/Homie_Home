@@ -1,5 +1,6 @@
 import { fetchDataApi } from './api.jsx';
 
+
 export const setLoginData = (username, token) => {
   localStorage.setItem('username', username);
   localStorage.setItem('token', token);
@@ -10,13 +11,16 @@ export const clearLoginData = () => {
   localStorage.removeItem('token');
 };
 
+
 export const getStoredToken = () => {
   return localStorage.getItem('token');
 };
 
+
 export const getStoredUsername = () => {
   return localStorage.getItem('username');
 };
+
 
 export const getAuthHeaders = () => {
   const token = getStoredToken();
@@ -68,6 +72,7 @@ export const checkLoginStatus = async () => {
     username: ''
   };
 };
+
 
 export const handleProtectedRoute = async (route, router, isLoggedIn, setIsLoggedIn, setShowLoginModal) => {
     const storedToken = getStoredToken();

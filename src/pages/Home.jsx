@@ -3,7 +3,7 @@ import Menubar from "@/components/Menubar.jsx";
 import { useRouter } from "next/router";
 import LoginModal from "@/components/auth/Loginpopup.jsx";
 import SignupModal from "@/components/auth/Signuppopup.jsx";
-import { checkLoginStatus, setLoginData, clearLoginData, getStoredToken, handleProtectedRoute } from "@/utils/auth.jsx";
+import { checkLoginStatus, setLoginData, handleProtectedRoute } from "@/utils/auth.jsx";
 import { groupSpaceData, calculateOverallProgress } from "@/utils/calculations.jsx";
 import { fetchRooms, fetchSpaceGuide } from "@/utils/fetchData.jsx";
 import { Dashboard } from "@/components/home/Dashboard.jsx";

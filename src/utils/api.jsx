@@ -1,6 +1,6 @@
 const API_BASE_URL = 'http://localhost:8000/api';
 
-// Generic function to fetch data from API
+// function fetch data from API
 export const fetchDataApi = async (method, endpoint, data = {}, headers = {}) => {
     try {
         console.log('Making API request to:', `${API_BASE_URL}/${endpoint}`);
@@ -27,7 +27,7 @@ export const fetchDataApi = async (method, endpoint, data = {}, headers = {}) =>
     }
 };
 
-// Function for PUT and DELETE operations
+// Function PUT and DELETE operations
 export const sendDataApi = async (method, endpoint, data = {}, headers = {}) => {
     const isFormData = data instanceof FormData;
     try {
@@ -56,7 +56,7 @@ export const sendDataApi = async (method, endpoint, data = {}, headers = {}) => 
     }
 };
 
-// Function for sending OTP
+// Function sending OTP
 export const sendOTPApi = async (username, email) => {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
@@ -88,7 +88,7 @@ export const sendOTPApi = async (username, email) => {
     }
 };
 
-// Function for verifying OTP
+// Function verifying OTP
 export const verifyOTPApi = async (username, otp, password) => {
     console.log(username, otp, password)
     try {
