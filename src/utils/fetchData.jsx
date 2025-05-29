@@ -52,16 +52,50 @@ export const fetchRoomToDoActivity = async (roomId) => {
 export const getOrganizeData = async () => {
   try {
     const data = await fetchDataApi('GET', 'organize/get');
-    return { 
-      props: { items: data }, 
-      revalidate: 10 
-    };
+    return { props: { items: data } };
   } catch (error) {
     handleApiError(error, 'fetching organize data');
-    return { 
-      props: { items: [] }, 
-      revalidate: 10 
-    };
+    return { props: { items: [] } };
+  }
+};
+
+export const searchOrganizeItems = async (searchTerm) => {
+  try {
+    const data = await fetchDataApi('GET', 'organize/get');
+    
+    // กรองข้อมูลตาม searchTerm
+    const filteredData = data
+      .filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .map(item => ({
+        id: item.id,
+        name: item.name
+      }));
+      
+    return filteredData;
+  } catch (error) {
+    handleApiError(error, 'searching organize items');
+    return [];
+  }
+};
+
+export const addOrganizeItem = async (item) => {
+  try {
+    // ใช้ Atlas Search เพื่อค้นหาข้อมูลที่ตรงกันมากที่สุด
+    const searchResults = await fetchDataApi('GET', `organize/search?searchTerm=${encodeURIComponent(item.name)}`);
+    
+    if (searchResults.length > 0) {
+      // เลือกผลลัพธ์ที่มีคะแนนสูงสุด
+      const bestMatch = searchResults.reduce((prev, current) => 
+        (prev.score > current.score) ? prev : current
+      );
+      return bestMatch;
+    }
+    // ถ้าไม่พบผลลัพธ์ ให้ใช้ข้อมูลเดิม
+    return item;
+  } catch (error) {
+    handleApiError(error, 'adding organize item');
+    // ถ้าเกิดข้อผิดพลาด ให้ใช้ข้อมูลเดิม
+    return item;
   }
 };
 
