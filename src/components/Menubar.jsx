@@ -4,6 +4,7 @@ import Image from "next/image";
 import Logo from "/public/Group 40.png";
 import { useRouter } from "next/router";
 import { LogOut } from 'lucide-react';
+import { getStoredToken, getStoredUsername, clearLoginData, handleProtectedRoute } from "@/utils/auth.jsx";
 
 const afacadFont = Afacad({
   subsets: ["latin"],
@@ -20,15 +21,14 @@ export default function Menubar({
   const [username, setUsername] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUsername = localStorage.getItem('username');
+    const token = getStoredToken();
+    const storedUsername = getStoredUsername();
     setIsLoggedIn(!!token);
     setUsername(storedUsername || '');
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
+    clearLoginData();
     setIsLoggedIn(false);
     setUsername('');
     if (router.pathname !== '/Home') {
@@ -38,13 +38,8 @@ export default function Menubar({
     }
   };
 
-  const handleProtectedRoute = (route) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      router.push(route);
-    } else {
-      if (onLoginModalToggle) onLoginModalToggle(true);
-    }
+  const handleRouteClick = (route) => {
+    handleProtectedRoute(route, router, isLoggedIn, setIsLoggedIn, onLoginModalToggle);
   };
 
   return (
@@ -60,21 +55,21 @@ export default function Menubar({
         {/* เมนูตรงกลาง */}
         <div className="flex flex-row items-center justify-center flex-1 mx-2 gap-4">
           <button
-            onClick={() => handleProtectedRoute("/Organize")}
+            onClick={() => handleRouteClick("/Organize")}
             className="font-bold text-[13pt] text-[#2A3663] hover:underline"
             style={{ fontWeight: 700 }}
           >
             Organize
           </button>
           <button
-            onClick={() => handleProtectedRoute("/Todolist")}
+            onClick={() => handleRouteClick("/Todolist")}
             className="font-bold text-[13pt] text-[#2A3663] hover:underline"
             style={{ fontWeight: 700 }}
           >
             To-Do
           </button>
           <button
-            onClick={() => handleProtectedRoute("/Ideas")}
+            onClick={() => handleRouteClick("/Ideas")}
             className="font-bold text-[13pt] text-[#2A3663] hover:underline"
             style={{ fontWeight: 700 }}
           >
@@ -117,13 +112,13 @@ export default function Menubar({
         </button>
         <div className="flex justify-end w-[50%]">
           <div className="bg-[#2A3663] flex justify-around m-2 w-[70%] rounded-[10px]">
-            <button onClick={() => handleProtectedRoute("/Organize")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-l-[1rem]">
+            <button onClick={() => handleRouteClick("/Organize")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-l-[1rem]">
               <h1 className="text text-white">Organize</h1>
             </button>
-            <button onClick={() => handleProtectedRoute("/Todolist")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38]">
+            <button onClick={() => handleRouteClick("/Todolist")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38]">
               <h1 className="text text-white">To-do List</h1>
             </button>
-            <button onClick={() => handleProtectedRoute("/Ideas")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-r-[1rem]">
+            <button onClick={() => handleRouteClick("/Ideas")} className="flex items-center justify-center font-bold text-[24pt] w-[60%] transition-all duration-500 ease-in-out hover:bg-[#131b38] hover:rounded-r-[1rem]">
               <h1 className="text text-white">Ideas</h1>
             </button>
           </div>
