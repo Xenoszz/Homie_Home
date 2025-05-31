@@ -18,7 +18,7 @@ export default function TaskList({
                 <div
                     key={task._id}
                     className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 hover:bg-gray-50 ${highlightedTaskId === task._id ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md' : ''}`}
-                > 
+                >   
                     {/* Checkbox */}
                     <div 
                         className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-3 border ${

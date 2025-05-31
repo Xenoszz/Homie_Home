@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import Head from 'next/head';
 import Menubar from "@/components/Menubar.jsx";
 import { useRouter } from "next/router";
 import LoginModal from "@/components/auth/Loginpopup.jsx";
@@ -86,7 +87,11 @@ export default function Home() {
   const overallProgress = calculateOverallProgress(rooms);
 
   return (
+    
     <div className="h-[100vh] w-[100vw]">
+      <Head>
+        <title>Home</title>
+      </Head>
       <Menubar 
         onLoginModalToggle={toggleLoginModal}
         onSignupModalToggle={toggleSignupModal}
