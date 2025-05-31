@@ -1,4 +1,5 @@
 import Menubar from "@/components/Menubar.jsx";
+import Head from 'next/head';
 import { SquarePlus, CircleX, Edit, Loader } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -63,13 +64,16 @@ export default function Todolist() {
     if (loading) {
         return (
             <div className="h-screen w-screen flex justify-center items-center">
-                <Loader className="w-12 h-12 animate-spin text-blue-500" />
+                <Loader className="w-12 h-12 animate-spin text-blue-500" /> 
             </div>
         );
     }
 
     return (
         <div className="h-screen w-screen">
+            <Head>
+                <title>Todolist</title>
+            </Head>
             <Menubar />
             <div className="p-4">
                 <h1 className="font-bold text-[22pt] md:text-[32pt] text-[#58482D]">Add Cleaning Space</h1>

@@ -1,4 +1,5 @@
 import Menubar from "@/components/Menubar.jsx";
+import Head from 'next/head';
 import { ArrowLeft, Loader } from 'lucide-react';
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -115,6 +116,9 @@ export default function TodoActivity() {
     
     return (
         <div className="h-screen w-screen bg-[#F5F2E8]">
+            <Head>
+                <title>{room?.name}</title>
+            </Head>
             <Menubar />
             <div className="p-4 max-w-7xl mx-auto">
                 <div className="flex items-center mb-6">

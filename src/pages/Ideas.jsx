@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Head from 'next/head';
 import Image from "next/image";
 import Menubar from "@/components/Menubar";
 import SearchIcon from "/public/Search_alt_fill.png";
@@ -46,6 +47,9 @@ export default function Ideas() {
 
   return (
     <div className="flex flex-col h-screen w-full">
+      <Head>
+        <title>Ideas</title>
+      </Head>
       {/* Sticky Menubar */}
       <div className="sticky top-0 left-0 w-full z-50">
         <Menubar />

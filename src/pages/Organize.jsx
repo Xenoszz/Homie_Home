@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Head from 'next/head';
 import Menubar from "@/components/Menubar";
 import { getOrganizeData, searchOrganizeItems, addOrganizeItem } from "@/utils/fetchData.jsx";
 import { calculatePagination } from "@/utils/calculations.jsx";
@@ -96,6 +97,9 @@ export default function Organize() {
 
   return (
     <div className="min-h-[100vh] w-[100vw] overflow-y-auto">
+      <Head>
+        <title>Organize</title>
+      </Head>
       <Menubar />
       <h1 className="text-[24pt] md:text-[36pt] font-bold m-2 md:m-4">Organize</h1>
 
