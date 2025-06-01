@@ -5,13 +5,33 @@ import Menubar from "@/components/Menubar";
 import SearchIcon from "/public/Search_alt_fill.png";
 import IdeaCard from "@/components/ideas/Ideacard";
 import IdeaPopup from "@/components/ideas/IdeaPopup";
+import GeneratedImagePopup from "@/components/ideas/GeneratedImagePopup";
 import { getIdeasData, getItemDetails } from "@/utils/fetchData.jsx";
+import { generateImage } from "@/utils/sendData.jsx";
 
 export default function Ideas() {
   const [searchTerm, setSearchTerm] = useState("");
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [showGeneratedPopup, setShowGeneratedPopup] = useState(false);
+
+  // sendData.jsx Generate function
+  const handleGenerate = async () => {
+    setLoading(true);
+    try {
+      const result = await generateImage(searchTerm);
+      if (result && result.imageUrl) {
+        setGeneratedImage(result.imageUrl);
+        setShowGeneratedPopup(true);
+      }
+    } catch (error) {
+      console.error('Error generating:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // fetchData.jsx   Fetch IdeasData
   useEffect(() => {
@@ -71,6 +91,7 @@ export default function Ideas() {
             />
             <Image src={SearchIcon} alt="search" width={20} height={20} />
           </div>
+          <button onClick={handleGenerate} className="bg-[#4F4534] text-white px-6 py-2 rounded-xl hover:bg-[#3a3326] transition-colors duration-200">Generate</button>
         </div>
       </div>
 
@@ -92,6 +113,14 @@ export default function Ideas() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         </div>
+      )}
+      
+      {/* Generated Image Popup */}
+      {showGeneratedPopup && generatedImage && (
+        <GeneratedImagePopup 
+          generatedImage={generatedImage}
+          onClose={() => setShowGeneratedPopup(false)}
+        />
       )}
       
       {/* Popup Modal */}
