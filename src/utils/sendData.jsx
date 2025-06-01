@@ -113,4 +113,21 @@ export const deleteTask = async (taskId) => {
     } catch (error) {
         handleApiError(error, 'deleting task');
     }
-}; 
+};
+
+export const generateImage = async (prompt) => {
+  try {
+    const response = await fetch('http://localhost:8000/api/idea/genimage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error generating:', error);
+    throw error;
+  }
+};
