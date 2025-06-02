@@ -102,18 +102,20 @@ export const addOrganizeItem = async (item) => {
 // ideas.js
 export const getIdeasData = async () => {
   try {
-    const response = await fetchDataApi('GET', 'idea/get');
+    const headers = getAuthHeaders();
+    const response = await fetchDataApi('GET', 'idea/get', {}, headers);
     return response;
   } catch (error) {
-    handleApiError(error);
-    return [];
+    console.error("Error fetching ideas data:", error);
+    throw error;
   }
 };
 
 // ideas.js
 export const getItemDetails = async (item) => {
   try {
-    const itemSearch = await fetchDataApi('GET', `idea/search?searchTerm=${encodeURIComponent(item.name)}`);
+    const headers = getAuthHeaders();
+    const itemSearch = await fetchDataApi('GET', `idea/search?searchTerm=${encodeURIComponent(item.name)}`, {}, headers);
     if (itemSearch && itemSearch.length > 0) {
       return itemSearch[0]; 
     }
@@ -121,5 +123,17 @@ export const getItemDetails = async (item) => {
   } catch (error) {
     handleApiError(error);
     return item; 
+  }
+};
+
+// GeneratedImages.js
+export const getGeneratedImages = async () => {
+  try {
+    const headers = getAuthHeaders();
+    const response = await fetchDataApi('GET', 'idea/GetGenimage', {}, headers);
+    return response;
+  } catch (error) {
+    console.error("Error fetching generated images:", error);
+    throw error;
   }
 };

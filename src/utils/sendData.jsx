@@ -117,17 +117,36 @@ export const deleteTask = async (taskId) => {
 
 export const generateImage = async (prompt) => {
   try {
-    const response = await fetch('http://localhost:8000/api/idea/genimage', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await response.json();
-    return data;
+    const headers = getAuthHeaders();
+    const response = await sendDataApi('POST', 'idea/genimage', {
+      prompt
+    }, headers);
+
+    if (response && !response.error) {
+      return response;
+    } else {
+      return Error(response?.error || 'Failed to generate image');
+    }
   } catch (error) {
     console.error('Error generating:', error);
-    throw error;
+    return error;
+  }
+};
+
+export const saveGeneratedImage = async (imageUrl) => {
+  try {
+    const headers = getAuthHeaders();
+    const response = await sendDataApi('POST', 'idea/saveimage', {
+      imageUrl
+    }, headers);
+
+    if (response && !response.error) {
+      return response;
+    } else {
+      return Error(response?.error || 'Failed to save image');
+    }
+  } catch (error) {
+    handleApiError(error, 'saving generated image');
+    return error;
   }
 };

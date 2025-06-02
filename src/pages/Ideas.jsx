@@ -6,7 +6,7 @@ import SearchIcon from "/public/Search_alt_fill.png";
 import IdeaCard from "@/components/ideas/Ideacard";
 import IdeaPopup from "@/components/ideas/IdeaPopup";
 import GeneratedImagePopup from "@/components/ideas/GeneratedImagePopup";
-import { getIdeasData, getItemDetails } from "@/utils/fetchData.jsx";
+import { getIdeasData, getItemDetails, getGeneratedImages } from "@/utils/fetchData.jsx";
 import { generateImage } from "@/utils/sendData.jsx";
 
 export default function Ideas() {
@@ -16,6 +16,7 @@ export default function Ideas() {
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [showGeneratedPopup, setShowGeneratedPopup] = useState(false);
+  const [showSaveButton, setShowSaveButton] = useState(true);
 
   // sendData.jsx Generate function
   const handleGenerate = async () => {
@@ -25,6 +26,7 @@ export default function Ideas() {
       if (result && result.imageUrl) {
         setGeneratedImage(result.imageUrl);
         setShowGeneratedPopup(true);
+        setShowSaveButton(true);
       }
     } catch (error) {
       console.error('Error generating:', error);
@@ -34,15 +36,39 @@ export default function Ideas() {
   };
 
   // fetchData.jsx   Fetch IdeasData
+  const fetchData = async () => {
+    try {
+      // Fetch both ideas data and saved generated images
+      const [ideasData, savedImages] = await Promise.all([
+        getIdeasData(),
+        getGeneratedImages()
+      ]);
+
+      // Combine the data
+      const combinedData = [
+        ...ideasData,
+        ...savedImages.map(img => ({
+          name: 'Generated Image',
+          image: img.imageUrl,
+          isGenerated: true,
+          createdAt: img.createdAt
+        }))
+      ];
+
+      // Sort by creation date (newest first)
+      combinedData.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA;
+      });
+
+      setItems(combinedData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getIdeasData();
-        setItems(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
     fetchData();
   }, []);
 
@@ -55,11 +81,19 @@ export default function Ideas() {
   const handleItemClick = async (item) => {
     setLoading(true);
     try {
-      const itemDetails = await getItemDetails(item);
-      setSelectedItem(itemDetails);
+      if (item.isGenerated) {
+        setGeneratedImage(item.image);
+        setShowGeneratedPopup(true);
+        setShowSaveButton(false);
+      } else {
+        const itemDetails = await getItemDetails(item);
+        setSelectedItem(itemDetails);
+      }
     } catch (error) {
       console.error("Error fetching item details:", error);
-      setSelectedItem(item);
+      if (!item.isGenerated) {
+        setSelectedItem(item);
+      }
     } finally {
       setLoading(false);
     }
@@ -120,6 +154,8 @@ export default function Ideas() {
         <GeneratedImagePopup 
           generatedImage={generatedImage}
           onClose={() => setShowGeneratedPopup(false)}
+          showSaveButton={showSaveButton}
+          onRefresh={fetchData}
         />
       )}
       
