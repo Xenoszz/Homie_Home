@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Head from 'next/head';
 import Image from "next/image";
 import Menubar from "@/components/Menubar";
@@ -36,7 +36,7 @@ export default function Ideas() {
   };
 
   // fetchData.jsx   Fetch IdeasData
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       // Fetch both ideas data and saved generated images
       const [ideasData, savedImages] = await Promise.all([
@@ -66,11 +66,11 @@ export default function Ideas() {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  };
+  }, []); // Empty dependency array since it doesn't depend on any props or state
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   // Search data
   const filteredItems = items.filter((item) =>

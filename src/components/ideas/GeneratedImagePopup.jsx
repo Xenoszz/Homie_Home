@@ -7,10 +7,8 @@ const GeneratedImagePopup = ({ generatedImage, onClose, showSaveButton = true, o
   const handleSaveImage = async () => {
     try {
       setIsSaving(true);
-      // Save to backend
       await saveGeneratedImage(generatedImage);
       console.log(generatedImage);
-      // Refresh data after saving
       if (onRefresh) onRefresh();
     } catch (error) {
       console.error('Error saving image:', error);
