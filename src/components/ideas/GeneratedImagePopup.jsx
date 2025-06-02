@@ -9,6 +9,8 @@ const GeneratedImagePopup = ({ generatedImage, onClose, showSaveButton = true, o
       setIsSaving(true);
       await saveGeneratedImage(generatedImage);
       console.log(generatedImage);
+      // Close popup and refresh after successful save
+      onClose();
       if (onRefresh) onRefresh();
     } catch (error) {
       console.error('Error saving image:', error);
