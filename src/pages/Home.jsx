@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from "react";
 import Head from 'next/head';
-import Menubar from "@/components/Menubar.jsx";
+import Menubar from "../components/Menubar";
 import { useRouter } from "next/router";
-import LoginModal from "@/components/auth/Loginpopup.jsx";
-import SignupModal from "@/components/auth/Signuppopup.jsx";
+import Loginpopup from "@/components/auth/Loginpopup.jsx";
+import Signuppopup from "@/components/auth/Signuppopup.jsx";
 import { checkLoginStatus, setLoginData, handleProtectedRoute } from "@/utils/auth.jsx";
 import { groupSpaceData, calculateOverallProgress } from "@/utils/calculations.jsx";
 import { fetchRooms, fetchSpaceGuide } from "@/utils/fetchData.jsx";
@@ -138,7 +138,7 @@ export default function Home() {
       </div>
 
       {/* Login Modal Component */}
-      <LoginModal 
+      <Loginpopup 
         isOpen={showLoginModal}
         onClose={() => {
           setShowLoginModal(false);
@@ -153,7 +153,7 @@ export default function Home() {
       />
 
       {/* Signup Modal Component */}
-      <SignupModal 
+      <Signuppopup 
         isOpen={showSignupModal}
         onClose={() => {
           setShowSignupModal(false);

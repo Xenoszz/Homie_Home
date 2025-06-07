@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://nwxenosz.org/api';
 
 // function fetch data from API
 export const fetchDataApi = async (method, endpoint, data = {}, headers = {}) => {
