@@ -28,7 +28,7 @@ const GeneratedImagePopup = ({ generatedImage, onClose, showSaveButton = true, o
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl max-w-4xl w-full mx-4 relative">
+      <div className="bg-white p-6 rounded-xl max-w-4xl w-full mx-4 relative max-h-[90vh] overflow-y-auto">
         <div className="absolute top-4 right-4 flex gap-2">
           {showSaveButton && (
             <button
@@ -49,10 +49,10 @@ const GeneratedImagePopup = ({ generatedImage, onClose, showSaveButton = true, o
           </button>
         </div>
         <div className="mt-6">
-          <img 
-            src={generatedImage} 
-            alt="Generated design" 
-            className="w-full h-auto rounded-lg"
+          <img
+            src={generatedImage}
+            alt="Generated design"
+            className="w-full h-auto rounded-lg max-h-[calc(90vh-8rem)] object-contain"
           />
         </div>
       </div>
